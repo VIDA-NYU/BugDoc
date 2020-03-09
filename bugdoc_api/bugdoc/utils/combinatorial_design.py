@@ -83,7 +83,7 @@ def get_disjoint_pairs_with_max(keys,max0,max1):
 def generate_tuples(parameters):
 	if (len(parameters.keys()) % 2 != 0):
 		parameters['dummy'] = []
-	keys = parameters.keys()
+	keys = list(parameters.keys())
 	max0 = keys[0]
 	max1 = keys[1]
 	for key in keys[1:]:

@@ -34,13 +34,21 @@
 
 #Following blog post at: http://kldavenport.com/pure-python-decision-trees/
 
+from __future__ import division
+from __future__ import print_function
+
+from builtins import str
+from builtins import range
+from builtins import object
+import collections
 from PIL import Image, ImageDraw
 
 
-import collections
-
-
 def unique_counts(rows):
+    """
+    :param rows:
+    :return:
+    """
     results = {}
     for row in rows:
         # The result is the last column
@@ -51,6 +59,10 @@ def unique_counts(rows):
 
 
 def unique_counts_dd(rows):
+    """
+    :param rows:
+    :return:
+    """
     results = collections.defaultdict(lambda: 0)
     for row in rows:
         r = row[len(row) - 1]
@@ -61,20 +73,26 @@ def unique_counts_dd(rows):
 # Entropy is the sum of p(x)log(p(x)) across all the different possible results
 
 def entropy(rows):
+    """
+    :param rows:
+    :return:
+    """
     from math import log
-    log2 = lambda x: log(x) / log(2)
+    log2 = lambda x: log(x) // log(2)
     results = unique_counts(rows)
 
     # Now calculate the entropy
     ent = 0.0
-    for r in results.keys():
+    for r in list(results.keys()):
         # current probability of class
         p = float(results[r]) / len(rows)
         ent -= p * log2(p)
     return ent
 
 
-class DecisionNode:
+class DecisionNode(object):
+    """
+    """
     def __init__(self, col=-1, cols=[], value=None, best_gain=None, results=None, tb=None, fb=None, parent=None):
         self.col = col  # column index of criteria being tested
         self.best_gain = best_gain
@@ -86,7 +104,9 @@ class DecisionNode:
         self.parent = parent
 
 
-class Stats:
+class Stats(object):
+    """
+    """
     leaf_nodes = 0
     pure_nodes = 0
 
@@ -94,10 +114,14 @@ class Stats:
         self.leaf_nodes = self.count_leaf(tree)
 
     def count_leaf(self, tree):
+        """
+        :param tree:
+        :return:
+        """
         if not tree:
             return 0
         if not tree.fb and not tree.tb:
-            if len(tree.results.keys()) == 1:
+            if len(list(tree.results.keys())) == 1:
                 self.pure_nodes += 1
             return 1
         else:
@@ -111,6 +135,12 @@ def __init__(self, t_set, cols):
 
 # Divides a set on a specific column. Can handle numeric or nominal values
 def divide_set(rows, column, value):
+    """
+    :param rows:
+    :param column:
+    :param value:
+    :return:
+    """
     # for numerical values
     if isinstance(value, int) or isinstance(value, float):
         split_function = lambda row: row[column] >= value
@@ -126,12 +156,25 @@ def divide_set(rows, column, value):
 
 
 # **Caveats:**
-# Information gain is generally a good measure for deciding the relevance of an attribute, but there are some distinct shortcomings. One case is when information gain is applied to variabless that take on a large number of unique values. This is a concern not necessarily from a pure variance perspective, rather that the variable is too descriptive of the current observations.
+# Information gain is generally a good measure for deciding the relevance of an attribute,
+# but there are some distinct shortcomings. One case is when information gain is applied to
+# variabless that take on a large number of unique values. This is a concern not necessarily
+# from a pure variance perspective, rather that the variable is too descriptive of the current observations.
 #
-# **High mutual information** indicates a large reduction in uncertainty, credit card numbers or street addresss variables in a dataset uniquely identify a customer. These variables provide a great deal of identifying information if we are trying to predict a customer, but will not generalize well to unobserved/trained-on instances (overfitting).
+# **High mutual information** indicates a large reduction in uncertainty,
+# credit card numbers or street addresss variables in a dataset uniquely identify a customer.
+# These variables provide a great deal of identifying information if we are trying to predict a customer, but will not
+# generalize well to unobserved/trained-on instances (overfitting).
 
 
 def build(rows, score_fun=entropy, cols=None, parent=None):
+    """
+    :param rows:
+    :param score_fun:
+    :param cols:
+    :param parent:
+    :return:
+    """
     if len(rows) == 0:
         return DecisionNode()
 
@@ -170,55 +213,80 @@ def build(rows, score_fun=entropy, cols=None, parent=None):
 # We now have a function that returns a trained decision tree. We can print a rudimentary tree.
 
 def print_tree(tree, indent=''):
+    """
+    :param tree:
+    :param indent:
+    :return:
+    """
     # Is this a leaf node?
     if tree.results is not None:
-        print str(tree.results)
+        print(str(tree.results))
     else:
         # Print the criteria
-        print 'Column ' + str(tree.col_str) + ' : ' + str(tree.value) + '? '
+        print('Column ' + str(tree.col_str) + ' : ' + str(tree.value) + '? ')
 
         # Print the branches
-        print indent + 'True->',
+        print(indent + 'True->', end=' ')
         print_tree(tree.tb, indent + '  ')
-        print indent + 'False->',
+        print(indent + 'False->', end=' ')
         print_tree(tree.fb, indent + '  ')
 
 
 # printing stuff
 def get_width(tree):
+    """
+    :param tree:
+    :return:
+    """
     if tree.tb is None and tree.fb is None:
         return 1
     return get_width(tree.tb) + get_width(tree.fb)
 
 
 def get_depth(tree):
+    """
+    :param tree:
+    :return:
+    """
     if tree.tb is None and tree.fb is None:
         return 0
     return max(get_depth(tree.tb), get_depth(tree.fb)) + 1
 
 
 def draw_tree(tree, jpeg='tree.jpg'):
+    """
+    :param tree:
+    :param jpeg:
+    :return:
+    """
     w = get_width(tree) * 100
     h = get_depth(tree) * 100 + 120
 
     img = Image.new('RGB', (w, h), (255, 255, 255))
     draw = ImageDraw.Draw(img)
 
-    draw_node(draw, tree, w / 2, 20)
+    draw_node(draw, tree, w // 2, 20)
     img.save(jpeg, 'JPEG')
-    #img.show()
-    #IPython.display.display(IPython.display.Image(filename=jpeg))
+    # img.show()
+    # IPython.display.display(IPython.display.Image(filename=jpeg))
 
 
 def draw_node(draw, tree, x, y):
+    """
+    :param draw:
+    :param tree:
+    :param x:
+    :param y:
+    :return:
+    """
     if tree.results is None:
         # Get the width of each branch
         w1 = get_width(tree.fb) * 100
         w2 = get_width(tree.tb) * 100
 
         # Determine the total space required by this node
-        left = x - (w1 + w2) / 2
-        right = x + (w1 + w2) / 2
+        left = x - (w1 + w2) // 2
+        right = x + (w1 + w2) // 2
 
         # Draw the condition string
         draw.text((x - 20, y - 10),
@@ -226,20 +294,26 @@ def draw_node(draw, tree, x, y):
                   (0, 0, 0))
 
         # Draw links to the branches
-        draw.line((x, y, left + w1 / 2, y + 100), fill=(255, 0, 0))
-        draw.line((x, y, right - w2 / 2, y + 100), fill=(255, 0, 0))
+        draw.line((x, y, left + w1 // 2, y + 100), fill=(255, 0, 0))
+        draw.line((x, y, right - w2 // 2, y + 100), fill=(255, 0, 0))
 
         # Draw the branch nodes
-        draw_node(draw, tree.fb, left + w1 / 2, y + 100)
-        draw_node(draw, tree.tb, right - w2 / 2, y + 100)
+        draw_node(draw, tree.fb, left + w1 // 2, y + 100)
+        draw_node(draw, tree.tb, right - w2 // 2, y + 100)
     else:
-        txt = ' \n'.join(['%s:%d' % v for v in tree.results.items()])
+        txt = ' \n'.join(['%s:%d' % v for v in list(tree.results.items())])
         draw.text((x - 20, y), txt, (0, 0, 0))
 
 
-# Now that we have built our tree, we can feed new observations and classify them. The following code basically do what we could do manually by using the tree and answering the questions.
+# Now that we have built our tree, we can feed new observations and classify them.
+# The following code basically do what we could do manually by using the tree and answering the questions.
 
 def classify(observation, tree):
+    """
+    :param observation:
+    :param tree:
+    :return:
+    """
     if tree.results is not None:
         return tree.results
     else:
@@ -258,6 +332,12 @@ def classify(observation, tree):
 
 
 def precision(df, tree, n=100):
+    """
+    :param df:
+    :param tree:
+    :param n:
+    :return:
+    """
     import pyprind
     bar = pyprind.ProgBar(n, track_time=True, stream=1)
     p = 0
@@ -269,6 +349,5 @@ def precision(df, tree, n=100):
         if t in clf: p += 1
         bar.update()
     return float(p) / float(n)
-
 
 

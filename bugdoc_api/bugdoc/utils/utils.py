@@ -32,13 +32,17 @@
 ##
 ###############################################################################
 
+from __future__ import division
+from __future__ import print_function
+
+from builtins import str
+from builtins import range
 import copy
-import sys, os
-import logging
-from vistrails.core.modules.module_registry import get_module_registry
 import json
-from autodebug.combinatorial_design import generate_tuples
-import traceback
+import logging
+import os
+
+from bugdoc.utils.combinatorial_design import generate_tuples
 
 goodbad = [True, False]
 numtests = 30
@@ -53,14 +57,13 @@ def evaluate(x, formula):
     return ret
 
 
-def compute_score(experiment,input_parameters, pv_goodness,moralflag):
+def compute_score(experiment, input_parameters, pv_goodness, moralflag):
     score = 0
     for i in range(len(input_parameters)):
         key = input_parameters[i]
         v = experiment[i]
-        score += float(pv_goodness[key][v][moralflag])/float(pv_goodness[key][v]['good']+pv_goodness[key][v]['bad'])
+        score += float(pv_goodness[key][v][moralflag]) / float(pv_goodness[key][v]['good'] + pv_goodness[key][v]['bad'])
     return score
-
 
 
 def loadtests(filename):
@@ -91,11 +94,10 @@ def loadtests(filename):
         x.append(evaluate(e, formula))
         allresults.append(x)
 
-    return [workflow, allexperiments, allresults, formula, cost, cols]
+    return [worinfilekflow, allexperiments, allresults, formula, cost, cols]
 
 
-def load_runs(filename, input_keys,lims = None):
-    print 'loading', filename
+def load_runs(filename, input_keys, lims=None):
     if os.path.isfile(filename):
         fileicareabout = open(filename, "r")
     else:
@@ -105,15 +107,15 @@ def load_runs(filename, input_keys,lims = None):
 
     allexperiments = []
     allresults = []  # experiments and their results
-    pv_goodness = {} # number of good and bad instances by parameter-value
+    pv_goodness = {}  # number of good and bad instances by parameter-value
 
     if lims is None:
-        lims = [0,len(alllines)]
+        lims = [0, len(alllines)]
     for e in alllines[lims[0]:lims[1]]:
         try:
             exp = []
             exp_dict = json.loads(e[:-1])
-            if type(exp_dict['result']) == unicode:
+            if type(exp_dict['result']) == str:
                 result_value = exp_dict['result'].encode("utf-8")
             else:
                 result_value = exp_dict['result']
@@ -122,14 +124,14 @@ def load_runs(filename, input_keys,lims = None):
                 if key not in pv_goodness:
                     pv_goodness[key] = {}
 
-                if type(exp_dict[key]) == unicode:
+                if type(exp_dict[key]) == str:
                     v = exp_dict[key].encode("utf-8")
                 else:
                     v = exp_dict[key]
                 exp.append(v)
 
                 if v not in pv_goodness[key]:
-                    pv_goodness[key][v]={'good':0,'bad':0}
+                    pv_goodness[key][v] = {'good': 0, 'bad': 0}
 
                 if eval(result_value):
                     pv_goodness[key][v]['good'] += 1
@@ -138,9 +140,6 @@ def load_runs(filename, input_keys,lims = None):
             exp.append(result_value)
             allexperiments.append(exp)
         except:
-            print("-" * 60)
-            traceback.print_exc(file=sys.stdout)
-            print("-" * 60)
             pass
 
     for e in allexperiments:
@@ -150,14 +149,13 @@ def load_runs(filename, input_keys,lims = None):
     return [allexperiments, allresults, pv_goodness]
 
 
-def load_dataxray(filename, input_keys, lims = None):
+def load_dataxray(filename, input_keys, lims=None):
     if os.path.isfile(filename):
         fileicareabout = open(filename, "r")
     else:
         fileicareabout = open(filename, "w+")
     alllines = fileicareabout.readlines()
     fileicareabout.close()
-
 
     feature_vector = ""
     for i in range(len(input_keys)):
@@ -168,8 +166,8 @@ def load_dataxray(filename, input_keys, lims = None):
     count = 0
     count_error = 0
     if lims is None:
-        lims = [0,len(alllines)]
-    print('limits',str(lims))
+        lims = [0, len(alllines)]
+    print(('limits', str(lims)))
     for e in alllines[lims[0]:lims[1]]:
         try:
             exp_dict = json.loads(e[:-1])
@@ -178,7 +176,7 @@ def load_dataxray(filename, input_keys, lims = None):
             if not result:
                 count_error += 1
             for key in input_keys:
-                if type(exp_dict[key]) == unicode:
+                if type(exp_dict[key]) == str:
                     v = exp_dict[key].encode("utf-8")
                 else:
                     v = exp_dict[key]
@@ -187,7 +185,7 @@ def load_dataxray(filename, input_keys, lims = None):
             feature_vector += '='
         except:
             pass
-    #TODO learn how to compute cost
+    # TODO learn how to compute cost
     return feature_vector.replace('rate', str(0 if count == 0 else count_error / float(count))).replace('cost', '99.99')
 
 
@@ -195,41 +193,41 @@ def load_combinatorial(input_dict):
     return generate_tuples(input_dict)
 
 
-def _iterate_over_keys(permutations,current_permutation,input_dict):
-    key = current_permutation.keys()[-1]
-    if key == input_dict.keys()[-1]:
+def _iterate_over_keys(permutations, current_permutation, input_dict):
+    key = list(current_permutation.keys())[-1]
+    if key == list(input_dict.keys())[-1]:
         for value in input_dict[key]:
             current_permutation[key] = value
             permutation = copy.deepcopy(current_permutation)
             permutations.append(permutation)
     else:
-        current_permutation[input_dict.keys()[len(current_permutation.keys())]] = None
+        current_permutation[list(input_dict.keys())[len(list(current_permutation.keys()))]] = None
         for value in input_dict[key]:
             current_permutation[key] = value
             permutation = copy.deepcopy(current_permutation)
-            _iterate_over_keys(permutations,permutation,input_dict)
-
-
+            _iterate_over_keys(permutations, permutation, input_dict)
 
 
 def load_permutations(input_dict):
     permutations = []
-    current_permutation = {input_dict.keys()[0]:None}
-    _iterate_over_keys(permutations,current_permutation,input_dict)
+    current_permutation = {list(input_dict.keys())[0]: None}
+    _iterate_over_keys(permutations, current_permutation, input_dict)
     return permutations
 
+
 def record_run(moduleInfo, result):
+    from vistrails.core.modules.module_registry import get_module_registry
     paramDict = {}
     vistrail_name = moduleInfo['locator'].name
     file_name = vistrail_name.replace('.vt', '.adb')
     f = open(file_name, "a")
     reg = get_module_registry()
     pipeline = moduleInfo['pipeline']
-    sortedModules = sorted(pipeline.modules.iteritems(),
+    sortedModules = sorted(iter(pipeline.modules.items()),
                            key=lambda item: item[1].name)
     for mId, module in sortedModules:
         if len(module.functions) > 0:
-            for fId in xrange(len(module.functions)):
+            for fId in range(len(module.functions)):
                 function = module.functions[fId]
                 desc = reg.get_descriptor_by_name('org.vistrails.vistrails.basic', 'OutputPort')
                 if module.module_descriptor is desc: continue
@@ -249,13 +247,7 @@ def record_python_run(paramDict, vistrail_name, origin=None):
         paramDict["origin"] = origin
     file_name = vistrail_name.replace('.vt', '.adb')
     f = open(file_name, "a")
-    f.write(json.dumps(paramDict) + '\n')
+    f.write(json.dumps(str(paramDict)) + '\n')
     f.close()
 
 
-
-#input_dict = {'p1':['p11','p12','p13'],'p2':['p21','p22','p23'],'p3':['p31','p32','p33'],'p4':['p41','p42','p43']}
-#permutations = load_permutations(input_dict)
-#print('permutations',len(permutations))
-#for permutation in permutations:
-#    print(permutation)

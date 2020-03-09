@@ -32,14 +32,21 @@
 ##
 ###############################################################################
 
-
-import copy
-import Queue
-import logging
-import zmq
-import time
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+from six import string_types
 import ast
-import bugdoc.utils.utils.tree as tree
+import copy
+import queue
+import logging
+import time
+import zmq
+
+import bugdoc.utils.tree as tree
 from bugdoc.utils.utils import load_runs, compute_score, goodbad, numtests, load_combinatorial, load_permutations
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.ERROR)
@@ -62,7 +69,7 @@ class AutoDebug(object):
             self.purebadlist.append(path)
 
     def findshoertestpaths(self, node):
-        q = Queue.Queue()
+        q = queue.Queue()
         q.put((node, []))
         puregoodpath = None
         purebadpath = None
@@ -71,16 +78,16 @@ class AutoDebug(object):
             if current[0].results is None:
                 q.put((current[0].fb, current[1] + [(current[0].col, current[0].value, False)]))
                 q.put((current[0].tb, current[1] + [(current[0].col, current[0].value, True)]))
-            elif (len(current[0].results.items()) > 1):
+            elif (len(list(current[0].results.items())) > 1):
                 continue
-            elif (current[0].results.items()[0][0]) and (puregoodpath is None):
+            elif (list(current[0].results.items())[0][0]) and (puregoodpath is None):
                 puregoodpath = current[1]
-            elif (not current[0].results.items()[0][0]) and (purebadpath is None):
+            elif (not list(current[0].results.items())[0][0]) and (purebadpath is None):
                 purebadpath = current[1]
         return [puregoodpath, purebadpath]
 
     def findallpaths(self, node):
-        q = Queue.Queue()
+        q = queue.Queue()
         q.put((node, []))
         puregoodpaths = []
         purebadpaths = []
@@ -92,11 +99,11 @@ class AutoDebug(object):
                 value = current[0].value
                 q.put((current[0].fb, current[1] + [(key, value, False)]))
                 q.put((current[0].tb, current[1] + [(key, value, True)]))
-            elif (len(current[0].results.items()) > 1):
+            elif (len(list(current[0].results.items())) > 1):
                 continue
-            elif (current[0].results.items()[0][0]):
+            elif (list(current[0].results.items())[0][0]):
                 puregoodpaths.append(current[1])
-            elif (not current[0].results.items()[0][0]):
+            elif (not list(current[0].results.items())[0][0]):
                 purebadpaths.append(current[1])
         return [puregoodpaths, purebadpaths]
 
@@ -133,12 +140,12 @@ class AutoDebug(object):
             y = set(myarrtrans[j])
             for index, value, flag in [tup for tup in path if tup[0] == j]:
                 if flag:
-                    if isinstance(value, str):
+                    if isinstance(value, string_types):
                         y = {value}
                     else:
                         y = {element for element in y if element >= value}
                 else:
-                    if isinstance(value, str):
+                    if isinstance(value, string_types):
                         y = y - {value}
                     else:
                         y = {element for element in y if element < value}

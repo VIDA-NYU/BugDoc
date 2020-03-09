@@ -24,15 +24,12 @@ req = ['pytest-cov',
        'certifi>=2017.4.17',
        'Pillow',
        'image',
-       'scikit-learn==0.19.0',
-       'sklearn==0.0',
+       'scipy',
+       'scikit-learn',
+       'sklearn',
        'nose==1.3.7',
        'pandas==0.24.0',
-       'scipy == 0.19.1',
        'Django == 1.11.23']
-    
-if sys.version_info < (2, 7):
-    requirements.append('argparse')
 
 
 setup(name='bugdoc',
