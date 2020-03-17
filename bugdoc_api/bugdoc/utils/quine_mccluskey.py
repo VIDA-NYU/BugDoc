@@ -453,9 +453,9 @@ def findallpaths(node):
             q.put((current[0].tb, current[1] + [(key, value, True)]))
         elif (len(current[0].results.items()) > 1):
             continue
-        elif (current[0].results.items()[0][0]):
+        elif (list(current[0].results.items())[0][0]):
             puregoodpaths.append(current[1])
-        elif (not current[0].results.items()[0][0]):
+        elif (not list(current[0].results.items())[0][0]):
             purebadpaths.append(current[1])
     return [puregoodpaths, purebadpaths, input_dict]
 
@@ -484,7 +484,7 @@ def prune_tree(t, keys):
     goodpaths, badpaths, input_dict = findallpaths(t)
     miniterms, flatten = from_paths_to_binary(badpaths, input_dict)
     if len(flatten) <= 10:
-        s = reduce(len(flatten), miniterms)
+        s = reduce_terms(len(flatten), miniterms)
         results = []
         for prime in s:
             result = []

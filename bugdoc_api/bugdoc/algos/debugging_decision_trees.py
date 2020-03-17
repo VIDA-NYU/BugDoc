@@ -49,7 +49,7 @@ import zmq
 import bugdoc.utils.tree as tree
 from bugdoc.utils.utils import load_runs, compute_score, goodbad, numtests, load_combinatorial, load_permutations
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
 class AutoDebug(object):
@@ -133,7 +133,7 @@ class AutoDebug(object):
 
     def assembletests(self, moralflag, path):
         outlist = []
-        myarrtrans = zip(*self.allexperiments)
+        myarrtrans = list(zip(*self.allexperiments))
 
         input_dict = {}
         for j in range(len(self.cols) - 1):
@@ -187,7 +187,7 @@ class AutoDebug(object):
                 if self.is_poller_not_sync:
                     time.sleep(1)
                     self.is_poller_not_sync = False
-                requests.add(tuple(e))
+                requests.add(str(e))
 
         while len(requests) > 0:
             if len(requests) > self.max_instances:
@@ -195,7 +195,7 @@ class AutoDebug(object):
             socks = dict(self.poller.poll(1000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv(zmq.NOBLOCK)
+                    msg = self.receiver.recv_string(zmq.NOBLOCK)
                     exp = ast.literal_eval(msg)
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
@@ -210,7 +210,7 @@ class AutoDebug(object):
                             self.pv_goodness[key][v]['good'] += 1
                         else:
                             self.pv_goodness[key][v]['bad'] += 1
-                    requests.discard(tuple(exp[:-1]))
+                    requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
                     x[-1] = eval(x[-1])
                     result = x[-1]
@@ -240,7 +240,7 @@ class AutoDebug(object):
             return False
 
     def run(self, filename, input_dict, outputs, rebuild=True):
-        self.my_inputs = input_dict.keys()
+        self.my_inputs = list(input_dict.keys())
         self.my_outputs = outputs
         self.filename = filename
         self.allexperiments, self.allresults, self.pv_goodness = load_runs(filename.replace(".vt", ".adb"),
@@ -262,7 +262,7 @@ class AutoDebug(object):
                     if self.is_poller_not_sync:
                         time.sleep(1)
                         self.is_poller_not_sync = False
-                    requests.add(tuple(exp))
+                    requests.add(str(exp))
 
         while len(requests) > 0:
             if len(requests) > self.max_instances:
@@ -270,7 +270,7 @@ class AutoDebug(object):
             socks = dict(self.poller.poll(10000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv(zmq.NOBLOCK)
+                    msg = self.receiver.recv_string(zmq.NOBLOCK)
                     exp = ast.literal_eval(msg)
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
@@ -286,7 +286,7 @@ class AutoDebug(object):
                         else:
                             self.pv_goodness[key][v]['bad'] += 1
 
-                    requests.discard(tuple(exp[:-1]))
+                    requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
                     x[-1] = eval(x[-1])
                     result = x[-1]
@@ -346,15 +346,15 @@ class AutoDebug(object):
 
     def workflow(self, parameter_list):
         message = self.filename
-        message += "|" + str(parameter_list)
-        message += "|" + str(self.my_inputs)
-        message += "|" + str(self.my_outputs)
+        message += self.separator + str(parameter_list)
+        message += self.separator + str(list(self.my_inputs))
+        message += self.separator + str(self.my_outputs)
         if self.origin:
-            message += "|" + str(self.origin) + "_trees_" + str(self.cohort)
+            message += self.separator + str(self.origin) + "_trees_" + str(self.cohort)
         self.sender.send_string(message)
 
     def __init__(self, created_instances=False, first_solution=False, max_iter=10000, return_max_instances=False,
-                 k=10000, use_score=False, window=None, origin=None):
+                 k=10000, use_score=False, window=None, origin=None, separator="|"):
         self.created_instances = created_instances
         self.filename = None
         self.puregoodlist = []
@@ -393,3 +393,4 @@ class AutoDebug(object):
         self.is_poller_not_sync = True
         self.origin = origin
         self.cohort = 0
+        self.separator = separator

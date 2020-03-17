@@ -40,7 +40,7 @@ import time
 import random
 from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
 class AutoDebug(object):
@@ -128,7 +128,7 @@ class AutoDebug(object):
                 if self.is_poller_not_sync:
                     time.sleep(1)
                     self.is_poller_not_sync = False
-                requests.add(tuple(exp))
+                requests.add(str(exp))
 
         while len(requests) > 0:
             if len(requests) > self.max_instances:
@@ -136,10 +136,10 @@ class AutoDebug(object):
             socks = dict(self.poller.poll(10000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv(zmq.NOBLOCK)
+                    msg = self.receiver.recv_string(zmq.NOBLOCK)
                     exp = ast.literal_eval(msg)
                     self.allexperiments.append(exp)
-                    requests.discard(tuple(exp[:-1]))
+                    requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
                     x[-1] = eval(x[-1])
                     self.allresults.append(x)
@@ -177,7 +177,7 @@ class AutoDebug(object):
                             time.sleep(1)
                             self.is_poller_not_sync = False
 
-                        requests.add(tuple(cf_aux))
+                        requests.add(str(cf_aux))
 
                         while len(requests) > 0:
                             if len(requests) > self.max_instances:
@@ -185,10 +185,10 @@ class AutoDebug(object):
                             socks = dict(self.poller.poll(10000))
                             if socks:
                                 if socks.get(self.receiver) == zmq.POLLIN:
-                                    msg = self.receiver.recv(zmq.NOBLOCK)
+                                    msg = self.receiver.recv_string(zmq.NOBLOCK)
                                     exp = ast.literal_eval(msg)
                                     self.allexperiments.append(exp)
-                                    requests.discard(tuple(exp[:-1]))
+                                    requests.discard(str(exp[:-1]))
                                     x = copy.deepcopy(exp)
                                     x[-1] = eval(x[-1])
                                     result = x[-1]
@@ -238,15 +238,15 @@ class AutoDebug(object):
 
     def workflow(self, parameter_list):
         message = self.filename
-        message += "|" + str(parameter_list)
-        message += "|" + str(self.my_inputs)
-        message += "|" + str(self.my_outputs)
+        message += self.separator + str(parameter_list)
+        message += self.separator + str(list(self.my_inputs))
+        message += self.separator + str(self.my_outputs)
         if self.origin:
-            message += "|" + str(self.origin) + "_shortcut_" + str(self.cohort)
+            message += self.separator + str(self.origin) + "_trees_" + str(self.cohort)
         self.sender.send_string(message)
 
     def __init__(self, created_instances=False, first_solution=False, max_iter=1000, return_max_instances=False,
-                 k=numtests, use_score=False, origin=None):
+                 k=numtests, use_score=False, origin=None, separator="|"):
         self.created_instances = created_instances
         self.filename = None
         self.allexperiments = []
@@ -279,3 +279,4 @@ class AutoDebug(object):
         self.is_poller_not_sync = True
         self.origin = origin
         self.cohort = 0
+        self.separator = separator
