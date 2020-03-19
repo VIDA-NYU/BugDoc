@@ -24,11 +24,7 @@ req = ['pytest-cov',
        'certifi>=2017.4.17',
        'Pillow',
        'image',
-       'scipy',
-       'scikit-learn',
-       'sklearn',
        'nose==1.3.7',
-       'pandas==0.24.0',
        'Django == 1.11.23']
 
 
