@@ -481,9 +481,18 @@ def from_paths_to_binary(paths, input_dict):
 
 
 def prune_tree(t, keys):
+    """
+    Simplifies a decision tree by reducing redundant paths by Quine-McClusky.
+    :param t:the decision tree to be simplified
+    :param keys: the name of the parameters represented by the features of the tree.
+    :return results: a list with non-redundant paths of the tree, if possible.
+    """
+
     goodpaths, badpaths, input_dict = findallpaths(t)
     miniterms, flatten = from_paths_to_binary(badpaths, input_dict)
-    if len(flatten) <= 10:
+
+    # Quine-McClusky does not scale if the the number of different feature-values increases.
+    if 0 < len(flatten) <= 10:
         s = reduce_terms(len(flatten), miniterms)
         results = []
         for prime in s:
