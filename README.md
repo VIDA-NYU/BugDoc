@@ -6,7 +6,9 @@ BugDoc is a framework for finding root causes of erros in computational pipeline
 # Mission, Vision and Problem Statements
 
 Our mission is to improve the quality of science in general by alleviating the burden of debugging computational
-pipelines manually. BugDoc will be a must-have item in the computational pipeline designer's toolkit. It will be always
+pipelines manually. 
+
+BugDoc will be a must-have item in the computational pipeline designer's toolkit. It will be always
 open and customizable to adhere to any workflow system.
 
 Given a set of computational pipeline instances, some of which led to bad or questionable results, our goal is to find the root causes of failures, possibly by creating and executing new pipeline instances.
