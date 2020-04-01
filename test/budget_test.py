@@ -39,7 +39,7 @@ class TestBudget(object):
         if _tree.get_depth(t) > 0:
             keys = list(space.keys())
             result = prune_tree(t, keys)
-            assert ['p1=1', 'p1!=2'] in result
+            assert 'p1=1' in result[0]
         else:
             assert False
 
