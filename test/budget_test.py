@@ -30,7 +30,7 @@ class TestBudget(object):
         context.term()
 
     def test_diagnosis_false(self):
-        os.system("python test/python_worker & disown")
+        os.system("python test/python_worker.py & disown")
         space = {'p0':['a','b','c','d','e','f'],'p1':[0,1,2],'p2':['a','b','c','d','e','f']}
         filename = 'test/test_diagnosis.vt'
         outputs = ['result']
@@ -39,7 +39,7 @@ class TestBudget(object):
         if _tree.get_depth(t) > 0:
             keys = list(space.keys())
             result = prune_tree(t, keys)
-            assert ('p1','>=','1') in result
+            assert ['p1=1', 'p1!=2'] in result
         else:
             assert False
 

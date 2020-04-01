@@ -21,7 +21,7 @@ class TestPythonWorker(object):
         poller = zmq.Poller()
         poller.register(receiver, zmq.POLLIN)
 
-        os.system("python test/python_worker & disown")
+        os.system("python test/python_worker.py & disown")
 
         conf = [0,1,2]
         inputs = ['p0','p1','p2']
@@ -53,7 +53,7 @@ class TestPythonWorker(object):
         poller = zmq.Poller()
         poller.register(receiver, zmq.POLLIN)
 
-        os.system("python test/python_worker & disown")
+        os.system("python test/python_worker.py & disown")
 
         conf = [0,0,2]
         inputs = ['p0','p1','p2']
