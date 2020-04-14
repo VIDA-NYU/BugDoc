@@ -1,6 +1,6 @@
 # BugDoc [![Build Status](https://travis-ci.org/VIDA-NYU/BugDoc.svg?branch=master)](https://travis-ci.org/VIDA-NYU/BugDoc)
 
-BugDoc is a framework for finding root causes of erros in computational pipelines.
+BugDoc is a framework for finding root causes of errors in computational pipelines.
 
 
 # Mission, Vision and Problem Statements
