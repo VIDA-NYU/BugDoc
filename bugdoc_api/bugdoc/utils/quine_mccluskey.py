@@ -499,10 +499,10 @@ def prune_tree(t, keys):
             result = []
             for i in range(len(prime)):
                 if prime[i] == '1':
-                    comparator = ' == ' if isinstance(flatten[i][1], str) else '>='
+                    comparator = ' == ' if isinstance(flatten[i][1], str) else ' >= '
                     result.append(keys[flatten[i][0]] + comparator + str(flatten[i][1]))
                 elif prime[i] == '0':
-                    comparator = ' != ' if isinstance(flatten[i][1], str) else '<'
+                    comparator = ' != ' if isinstance(flatten[i][1], str) else ' < '
                     result.append(keys[flatten[i][0]] + comparator + str(flatten[i][1]))
             results.append(result)
     else:
