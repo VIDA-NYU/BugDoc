@@ -37,10 +37,13 @@ from __future__ import print_function
 
 from builtins import str
 from builtins import range
+import ast
 import copy
 import json
 import logging
 import os
+import sys, traceback
+
 
 from bugdoc.utils.combinatorial_design import generate_tuples
 
@@ -114,7 +117,7 @@ def load_runs(filename, input_keys, lims=None):
     for e in alllines[lims[0]:lims[1]]:
         try:
             exp = []
-            exp_dict = json.loads(e[:-1])
+            exp_dict = ast.literal_eval(json.loads(e[:-1]))
             if type(exp_dict['result']) == str:
                 result_value = exp_dict['result'].encode("utf-8")
             else:
@@ -140,6 +143,7 @@ def load_runs(filename, input_keys, lims=None):
             exp.append(result_value)
             allexperiments.append(exp)
         except:
+            traceback.print_exc(file=sys.stdout)
             pass
 
     for e in allexperiments:

@@ -295,7 +295,7 @@ class AutoDebug(object):
         message += self.separator + str(list(self.my_inputs))
         message += self.separator + str(self.my_outputs)
         if self.origin:
-            message += self.separator + str(self.origin) + "_trees_" + str(self.cohort)
+            message += self.separator + str(self.origin) + "_minimal_" + str(self.cohort)
         self.sender.send_string(message)
 
     def __init__(self, first_solution=False, max_iter=1000, return_max_instances=False, k=numtests, use_score=False,
