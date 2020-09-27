@@ -1,8 +1,6 @@
-import io
 import os
 from setuptools import setup
 
-import sys
 
 
 # pip workaround

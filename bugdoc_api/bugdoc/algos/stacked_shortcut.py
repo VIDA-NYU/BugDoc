@@ -37,10 +37,9 @@ import logging
 import zmq
 import ast
 import time
-import random
 from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
 class AutoDebug(object):
@@ -66,7 +65,7 @@ class AutoDebug(object):
                     cgs_alt.append(cg)
         return cgs, cgs_alt
 
-    def get_get_good_and_bad_instances_2(self, goodlist, badlist):
+    def get_good_and_bad_instances(self, goodlist, badlist):
         cgs = []
         cgs_alt = []
         cf = None
@@ -85,36 +84,15 @@ class AutoDebug(object):
                     return [cgs, cf]
                 cgs.append(cg)
             return [cgs, cf]
-        else:
-            return []
+        return []
 
-    def get_good_and_bad_instances(self, goodlist, badlist):
-        cgs = []
-        _cf = None
-        for cg in goodlist:
-            if _cf:
-                if (all([cg[i] != _cf[i] and cg[i] != cgi[i] for i in range(len(_cf))] for cgi in cgs)):
-                    cgs.append(cg)
-            else:
-                for cf in badlist:
-                    if (all([cg[i] != cf[i] for i in range(len(cf))])):
-                        cgs.append(cg)
-                        _cf = cf
-                        break
-            if len(cgs) >= self.k:
-                break
-        if _cf:
-            return [cgs, _cf]
-        else:
-            return [[random.choice(goodlist)], random.choice(badlist)]
-
-    def run(self, filename, input_dict, outputs):
+    def run(self, filename, input_dict, outputs=['results']):
         self.my_inputs = input_dict.keys()
         self.my_outputs = outputs
         self.filename = filename
         self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.filename.replace(".vt", ".adb"),
                                                                            self.my_inputs)
-        # logging.debug("allresults is: "+str(self.allresults))
+        logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         permutations = load_combinatorial(input_dict)
@@ -141,7 +119,7 @@ class AutoDebug(object):
                     self.allexperiments.append(exp)
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
-                    x[-1] = eval(x[-1])
+                    x[-1] = x[-1]
                     self.allresults.append(x)
             else:
                 for tup in requests:
@@ -152,13 +130,13 @@ class AutoDebug(object):
                         time.sleep(1)
                         self.is_poller_not_sync = False
 
-        # logging.debug('allexperiments: '+str(self.allexperiments))
+        logging.debug('allexperiments: '+str(self.allexperiments))
         initial_experiments_num = len(self.allexperiments)
         self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
         goodlist, badlist = self.determinepurity(self.expers, self.rets)
         # logging.debug("goodlist: " + str(goodlist))
-        lists = self.get_get_good_and_bad_instances_2(goodlist, badlist)
+        lists = self.get_good_and_bad_instances(goodlist, badlist)
         logging.debug("lists: " + str(lists))
         if len(lists) > 0:
             cgs, cf = lists
@@ -190,7 +168,7 @@ class AutoDebug(object):
                                     self.allexperiments.append(exp)
                                     requests.discard(str(exp[:-1]))
                                     x = copy.deepcopy(exp)
-                                    x[-1] = eval(x[-1])
+                                    x[-1] = x[-1]
                                     result = x[-1]
                                     # We could run the experiment
                                     if result is not None:
@@ -237,6 +215,7 @@ class AutoDebug(object):
         return self.believeddecisive, len(self.allexperiments), (len(self.allexperiments) - initial_experiments_num)
 
     def workflow(self, parameter_list):
+        logging.debug("Parameter List: " + str(parameter_list))
         message = self.filename
         message += self.separator + str(parameter_list)
         message += self.separator + str(list(self.my_inputs))

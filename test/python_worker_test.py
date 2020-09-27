@@ -34,7 +34,7 @@ class TestPythonWorker(object):
         if socks:
              if socks.get(receiver) == zmq.POLLIN:
                  msg = receiver.recv(zmq.NOBLOCK)
-                 assert msg.decode() == "[0, 1, 2, 'False']"
+                 assert msg.decode() == "[0, 1, 2, False]"
         time.sleep(1)
         sender.send_string('kill')
 
@@ -66,7 +66,7 @@ class TestPythonWorker(object):
         if socks:
              if socks.get(receiver) == zmq.POLLIN:
                  msg = receiver.recv(zmq.NOBLOCK)
-                 assert msg.decode() == "[0, 0, 2, 'True']"
+                 assert msg.decode() == "[0, 0, 2, True]"
 
         time.sleep(1)
         sender.send_string('kill')

@@ -19,6 +19,6 @@ class TestRuns(object):
         record_python_run(run, 'test.vt')
         _, runs, _ = load_runs('test.adb',['p1','p2','p3'])
         os.remove('test.adb')
-        assert [b'v1',2,0.3,False] == runs[0]
+        assert ['v1',2,0.3,False] == runs[0]
 
 

@@ -78,16 +78,16 @@ while True:
         kw_args[inputs[i]] = parameter_list[i]
     try:
         result = workflow_function(kw_args, diag)
-        parameter_list.append(str(result))
+        parameter_list.append(result)
 
     except:
         print("Exception in user code:")
         print("-" * 60)
         traceback.print_exc(file=sys.stdout)
         print("-" * 60)
-        parameter_list.append(str(False))
+        parameter_list.append(False)
 
-    kw_args['result'] = parameter_list[-1]
+    kw_args['result'] = str(parameter_list[-1])
     origin = None
     if len(fields) == 5:
         origin = fields[4]
