@@ -37,7 +37,7 @@ import logging
 import zmq
 import ast
 import time
-from bugdoc.utils.utils import load_runs, evaluate, goodbad, numtests, load_combinatorial, compute_score,\
+from bugdoc.utils.utils import load_runs, goodbad, numtests, load_combinatorial, compute_score,\
                                 load_permutations
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -71,18 +71,18 @@ class AutoDebug(object):
     # If the candidate index appears to be pure, then puts it into
     # believeddecisive [variableindex, moralflag, value]
     def manufacturetests(self, i, moralflag, alllists):
-        global believeddecisive
-        (puregoodlist, purebadlist, mixedlist) = alllists
-        if (moralflag == 'bad') and (0 < len(purebadlist[i])):
+        puregoodlist, purebadlist, _ = alllists
+        if (moralflag == 'bad') and (len(purebadlist[i]) > 0):
             for j in range(len(purebadlist[i])):
-                z = self.assembletests(i, 'bad', purebadlist[i][j], alllists)
+                self.assembletests(i, 'bad', purebadlist[i][j], alllists)
                 if self.first_solution and len(self.believeddecisive) > 0: break
             return i
-        if (moralflag == 'good') and (0 < len(puregoodlist[i])):
+        if (moralflag == 'good') and (len(puregoodlist[i]) > 0):
             for j in range(len(puregoodlist[i])):
-                z = self.assembletests(i, 'good', puregoodlist[i][j], alllists)
+                self.assembletests(i, 'good', puregoodlist[i][j], alllists)
                 if self.first_solution and len(self.believeddecisive) > 0: break
             return i
+        return None
 
     # assembletests creates tests for index testindex either good or bad
     # If the test is for good, then it takes val at location testindex
@@ -172,12 +172,12 @@ class AutoDebug(object):
                         if self.is_poller_not_sync:
                             time.sleep(1)
                             self.is_poller_not_sync = False
-        if (1 == len(set(allrets))):
+        if len(set(allrets)) == 1:
             if (moralflag == 'bad') and (allrets[0] == goodbad[1]):
                 self.believeddecisive.append([testindex, 'bad', val])
             if (moralflag == 'good') and (allrets[0] == goodbad[0]):
                 self.believeddecisive.append([testindex, 'good', val])
-        if (0 == len(set(allrets))):
+        if len(set(allrets)) == 0:
             self.believeddecisive.append([testindex, moralflag, val])
         return True
 
@@ -197,7 +197,7 @@ class AutoDebug(object):
             for param in self.my_inputs:
                 value = d[param]
                 exp.append(value)
-            if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+            if exp not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
                 self.workflow(exp)
                 if self.is_poller_not_sync:
                     time.sleep(1)

@@ -77,7 +77,7 @@ class AutoDebug(object):
             for param in self.my_inputs:
                 value = d[param]
                 exp.append(value)
-            if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+            if exp not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
                 self.workflow(exp)
                 if self.is_poller_not_sync:
                     time.sleep(1)

@@ -42,6 +42,7 @@ from builtins import range
 from builtins import object
 import collections
 from PIL import Image, ImageDraw
+from math import log
 
 
 def unique_counts(rows):
@@ -77,7 +78,6 @@ def entropy(rows):
     :param rows:
     :return:
     """
-    from math import log
     log2 = lambda x: log(x) // log(2)
     results = unique_counts(rows)
 
@@ -124,8 +124,8 @@ class Stats(object):
             if len(list(tree.results.keys())) == 1:
                 self.pure_nodes += 1
             return 1
-        else:
-            return self.count_leaf(tree.fb) + self.count_leaf(tree.tb)
+
+        return self.count_leaf(tree.fb) + self.count_leaf(tree.tb)
 
 
 def __init__(self, t_set, cols):
@@ -206,8 +206,7 @@ def build(rows, score_fun=entropy, cols=None, parent=None):
         false_branch = build(best_sets[1], cols=cols)
         return DecisionNode(col=best_criteria[0], value=best_criteria[1], cols=cols,
                             best_gain=best_gain, tb=true_branch, fb=false_branch)
-    else:
-        return DecisionNode(results=unique_counts(rows))
+    return DecisionNode(results=unique_counts(rows))
 
 
 # We now have a function that returns a trained decision tree. We can print a rudimentary tree.
@@ -305,49 +304,5 @@ def draw_node(draw, tree, x, y):
         draw.text((x - 20, y), txt, (0, 0, 0))
 
 
-# Now that we have built our tree, we can feed new observations and classify them.
-# The following code basically do what we could do manually by using the tree and answering the questions.
-
-def classify(observation, tree):
-    """
-    :param observation:
-    :param tree:
-    :return:
-    """
-    if tree.results is not None:
-        return tree.results
-    else:
-        v = observation[tree.col]
-        if isinstance(v, int) or isinstance(v, float):
-            if v >= tree.value:
-                branch = tree.tb
-            else:
-                branch = tree.fb
-        else:
-            if v == tree.value:
-                branch = tree.tb
-            else:
-                branch = tree.fb
-        return classify(observation, branch)
-
-
-def precision(df, tree, n=100):
-    """
-    :param df:
-    :param tree:
-    :param n:
-    :return:
-    """
-    import pyprind
-    bar = pyprind.ProgBar(n, track_time=True, stream=1)
-    p = 0
-    for i in range(n):
-        obs = df.sample(n=1).values[0]
-        t = obs[-1]
-        obs = obs[:-1]
-        clf = classify(obs, tree)
-        if t in clf: p += 1
-        bar.update()
-    return float(p) / float(n)
 
 

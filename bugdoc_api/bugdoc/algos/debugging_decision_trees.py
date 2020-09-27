@@ -31,25 +31,23 @@
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 ##
 ###############################################################################
-
-from future import standard_library
-standard_library.install_aliases()
-from builtins import zip
-from builtins import str
-from builtins import range
-from builtins import object
-from six import string_types
 import ast
+import bugdoc.utils.tree as tree
 import copy
 import queue
 import logging
 import time
 import zmq
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+from bugdoc.utils.utils import load_runs, compute_score, load_combinatorial, load_permutations
+from future import standard_library
+from six import string_types
 
-import bugdoc.utils.tree as tree
-from bugdoc.utils.utils import load_runs, compute_score, goodbad, numtests, load_combinatorial, load_permutations
-
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+standard_library.install_aliases()
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
 class AutoDebug(object):
@@ -138,7 +136,7 @@ class AutoDebug(object):
         input_dict = {}
         for j in range(len(self.cols) - 1):
             y = set(myarrtrans[j])
-            for index, value, flag in [tup for tup in path if tup[0] == j]:
+            for _, value, flag in [tup for tup in path if tup[0] == j]:
                 if flag:
                     if isinstance(value, string_types):
                         y = {value}
@@ -206,13 +204,13 @@ class AutoDebug(object):
                             self.pv_goodness[key] = {}
                         if v not in self.pv_goodness[key]:
                             self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
-                        if eval(result_value):
+                        if result_value:
                             self.pv_goodness[key][v]['good'] += 1
                         else:
                             self.pv_goodness[key][v]['bad'] += 1
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
-                    x[-1] = eval(x[-1])
+                    x[-1] = x[-1]
                     result = x[-1]
                     # We could run the experiment
                     if result is not None:
@@ -229,17 +227,17 @@ class AutoDebug(object):
                         time.sleep(1)
                         self.is_poller_not_sync = False
 
-        if (1 == len(set(allrets))):
+        if len(set(allrets)) == 1:
             if ((moralflag == 'good') and (not allrets[0])) or ((moralflag == 'bad') and allrets[0]):
                 return False
-            else:
-                return True
-        elif (0 == len(set(allrets))):
             return True
-        else:
-            return False
 
-    def run(self, filename, input_dict, outputs, rebuild=True):
+        if len(set(allrets)) == 0:
+            return True
+
+        return False
+
+    def run(self, filename, input_dict, outputs=['results'], rebuild=True):
         self.my_inputs = list(input_dict.keys())
         self.my_outputs = outputs
         self.filename = filename
@@ -281,14 +279,14 @@ class AutoDebug(object):
                             self.pv_goodness[key] = {}
                         if v not in self.pv_goodness[key]:
                             self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
-                        if eval(result_value):
+                        if result_value:
                             self.pv_goodness[key][v]['good'] += 1
                         else:
                             self.pv_goodness[key][v]['bad'] += 1
 
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
-                    x[-1] = eval(x[-1])
+                    x[-1] = x[-1]
                     result = x[-1]
                     # We could run the experiment
                     if result is not None:
@@ -304,12 +302,12 @@ class AutoDebug(object):
         self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
         self.cols = self.my_inputs + self.my_outputs
-        iter = 0
+        iteration = 0
         initial_experiments_num = len(self.allexperiments)
         while rebuild:
             self.cohort += 1
-            rebuild = len(self.allexperiments) < self.max_iter and len(self.allexperiments) > iter
-            iter = len(self.allexperiments)
+            rebuild = len(self.allexperiments) < self.max_iter and len(self.allexperiments) > iteration
+            iteration = len(self.allexperiments)
             logging.debug("rebuild")
             logging.debug("allresults is: " + str(self.allresults))
             logging.debug("allexperiments are: " + str(self.allexperiments))
@@ -318,11 +316,11 @@ class AutoDebug(object):
             if self.window:
                 self.window.updateTree()
             if self.first_solution:
-                goodpath, badpath = self.findshoertestpaths(t)
+                _, badpath = self.findshoertestpaths(t)
                 if badpath:
                     rebuild = rebuild and self.manufacturetests('bad', [badpath])
             else:
-                goodpaths, badpaths = self.findallpaths(t)
+                _, badpaths = self.findallpaths(t)
                 rebuild = rebuild and self.manufacturetests('bad', badpaths)
 
         self.puregoodlist = []

@@ -44,7 +44,6 @@ Here is the algorithm
 
 '''
 
-
 from __future__ import division
 from __future__ import print_function
 
@@ -68,9 +67,8 @@ def comp_binary(s1, s2):
         if s1[i] != s2[i]:
             if found_one:
                 return False, None
-            else:
-                pos = i
-                found_one = True
+            pos = i
+            found_one = True
     return found_one, pos
 
 
@@ -99,19 +97,18 @@ def combine_pairs(group, unchecked):
     """
     # define length
     keys = list(group.keys())
-    l = len(keys) - 1
 
     # create next group
     next_group = {}
 
     # go through the groups
-    for i in range(l):
+    for i in range(len(keys) - 1):
         # first selected group
         for elem1 in group[keys[i]]:
             # next selected group
             for elem2 in group[keys[i + 1]]:
                 b, pos = comp_binary(elem1, elem2)
-                if b == True:
+                if b is True:
                     if keys[i] not in next_group:
                         next_group[keys[i]] = set()
                     unchecked -= {elem1}
@@ -142,13 +139,13 @@ def remove_redundant(group):
 
 
 # remove redundant in 1d list
-def remove_redundant_list(list):
+def remove_redundant_list(one_d_list):
     """
-    :param list:
+    :param one_d_list:
     :return:
     """
     new_list = []
-    for i in list:
+    for i in one_d_list:
         if i not in new_list:
             new_list.append(i)
     return new_list
@@ -214,27 +211,26 @@ def multiplication(list1, list2):
     if len(list1) == 0 and len(list2) == 0:
         return list_result
     # if one is empty
-    elif len(list1) == 0:
+    if len(list1) == 0:
         return list2
     # if another is empty
-    elif len(list2) == 0:
+    if len(list2) == 0:
         return list1
 
     # both not empty
-    else:
-        for i in list1:
-            for j in list2:
-                # if two term same
-                if i == j:
-                    # list_result.append(sorted(i))
-                    list_result.append(i)
-                else:
-                    # list_result.append(sorted(list(set(i+j))))
-                    list_result.append(list(set(i + j)))
+    for i in list1:
+        for j in list2:
+            # if two term same
+            if i == j:
+                # list_result.append(sorted(i))
+                list_result.append(i)
+            else:
+                # list_result.append(sorted(list(set(i+j))))
+                list_result.append(list(set(i + j)))
 
-        # sort and remove redundant lists and return this list
-        list_result.sort()
-        return list(list_result for list_result, _ in itertools.groupby(list_result))
+    # sort and remove redundant lists and return this list
+    list_result.sort()
+    return list(list_result for list_result, _ in itertools.groupby(list_result))
 
 
 # petrick's method
@@ -258,9 +254,9 @@ def petrick_method(chart):
     petrick = sorted(petrick[len(petrick) - 1], key=len)
     final = []
     # find the terms with min length = this is the one with lowest cost (optimized result)
-    min = len(petrick[0])
+    minimum = len(petrick[0])
     for i in petrick:
-        if len(i) == min:
+        if len(i) == minimum:
             final.append(i)
         else:
             break
@@ -340,7 +336,7 @@ def find_minimum_cost(chart):
                     chart[row][col] = 0
 
     # if all zero, no need for petrick method
-    if check_all_zero(chart) == True:
+    if check_all_zero(chart) is True:
         p_final = [essential_prime]
     else:
         P = ga(chart)
@@ -395,8 +391,8 @@ def reduce_terms(n_var, minterms):
                 a[i] = '0' + a[i]
         # if incorrect input
         elif len(a[i]) > n_var:
-            print('\nError : Choose the correct number of variables(bits)\n')
-            return
+            # Error : Choose the correct number of variables(bits)
+            return []
         # count the num of 1
         index = a[i].count('1')
         # group by num of 1 separately
@@ -406,8 +402,7 @@ def reduce_terms(n_var, minterms):
         unchecked.add(a[i])
 
     # combine the pairs in series until nothing new can be combined
-    count = 0
-    while check_empty(group) == False:
+    while check_empty(group) is False:
         group, unchecked = combine_pairs(group, unchecked)
     # make the prime implicant chart
     # chart = [[0 for x in range(len(a))] for x in range(len(unchecked))]
@@ -488,7 +483,7 @@ def prune_tree(t, keys):
     :return results: a list with non-redundant paths of the tree, if possible.
     """
 
-    goodpaths, badpaths, input_dict = findallpaths(t)
+    _, badpaths, input_dict = findallpaths(t)
     miniterms, flatten = from_paths_to_binary(badpaths, input_dict)
 
     # Quine-McClusky does not scale if the the number of different feature-values increases.
