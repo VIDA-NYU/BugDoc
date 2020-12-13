@@ -35,6 +35,7 @@
 from __future__ import division
 from __future__ import print_function
 
+import ast
 import copy
 import json
 import os
@@ -76,7 +77,7 @@ def load_runs(filename, input_keys, lims=None):
     for e in alllines[lims[0]:lims[1]]:
         try:
             exp = []
-            exp_dict = json.loads(e[:-1])
+            exp_dict = ast.literal_eval(e)
 
             result_value = exp_dict['result']
 

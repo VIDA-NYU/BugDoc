@@ -484,6 +484,9 @@ def prune_tree(t, keys):
     """
 
     _, badpaths, input_dict = findallpaths(t)
+    print('badpaths', badpaths)
+    if any([len(badpath) > 10 for badpath in badpaths]):
+        return badpaths
     miniterms, flatten = from_paths_to_binary(badpaths, input_dict)
 
     # Quine-McClusky does not scale if the the number of different feature-values increases.
