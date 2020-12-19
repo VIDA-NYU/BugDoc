@@ -23,30 +23,30 @@ count_setup.run()
 count_setup.read()
 
 
-all_setup.prepare(5,8)
+all_setup.prepare(6,30)
 all_setup.run()
 all_setup.read()
 all_setup.read_answers()
 
 
 
-all_shortcut_setup.prepare(5,8)
+all_shortcut_setup.prepare(6,30)
 all_shortcut_setup.run()
 all_shortcut_setup.read()
 
-all_stacked_setup.prepare(5,8)
+all_stacked_setup.prepare(6,30)
 all_stacked_setup.run()
 all_stacked_setup.read()
 
-one_setup.prepare(5,8)
+one_setup.prepare(6,30)
 one_setup.run()
 one_setup.read()
 
-one_shortcut_setup.prepare(5,8)
+one_shortcut_setup.prepare(6,30)
 one_shortcut_setup.run()
 one_shortcut_setup.read()
 
-one_stacked_setup.prepare(5,8)
+one_stacked_setup.prepare(6,30)
 one_stacked_setup.run()
 one_stacked_setup.read()
 

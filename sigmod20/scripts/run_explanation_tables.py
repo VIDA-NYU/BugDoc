@@ -10,7 +10,7 @@ from formulas import *
 import explain_LL
 
 sys.path.append(os.path.join(os.getcwd(), '..'))
-sys.path.append(os.path.join(os.getcwd(), '../vistrails'))
+
 
 import json
 

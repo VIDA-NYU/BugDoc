@@ -6,7 +6,6 @@ import psycopg2
 import traceback
 from helpers import *
 sys.path.append(os.path.join(os.getcwd(), '..'))
-sys.path.append(os.path.join(os.getcwd(), '../vistrails'))
 
 
 def record_algo_result(experiment_name, algo, max_iter):
