@@ -62,4 +62,4 @@ The experiments were executed on a MacBook Pro, running macOS Catalina version 1
 * PostgresSQL 11
 * Python 3.6
 
-All the files related to the experiments are located under [``sigmod20/``](sigmod20). All the scripts assume that these softwares are properly installed and that there is a database instance with the following [configuration](sigmod20/experiments/db.conf).
+All the files related to the experiments are located under [``sigmod20/``](sigmod20). All the scripts assume that this software is properly installed and that there is a database instance with the following [configuration](sigmod20/experiments/db.conf).
