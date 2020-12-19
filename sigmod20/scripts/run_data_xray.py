@@ -4,7 +4,6 @@ import subprocess
 import time
 import ast
 sys.path.append(os.path.join(os.getcwd(), '..'))
-sys.path.append(os.path.join(os.getcwd(), '../vistrails'))
 from bugdoc.utils.utils import load_dataxray
 
 def execute(experiements_path, max_iter = sys.maxsize, prev = 0):
@@ -13,7 +12,7 @@ def execute(experiements_path, max_iter = sys.maxsize, prev = 0):
     alllines = fileicareabout.readlines()
     fileicareabout.close()
 
-    dataxray_folder = '../../../dataxray-source-code/dataxray'
+    dataxray_folder = '../dataxray'
 
     for experiment in alllines:
         experiment_name = experiements_path + '/' + experiment[:-1]
