@@ -54,7 +54,7 @@ Alternatively, we provide [ReproZip](https://vida-nyu.github.io/reprozip/) packa
 
 More detailed information about our experiments can be found in the following sections.
 
-### 6.1. Machine Configuration
+### 2.1. Machine Configuration
 
 The experiments were executed on a MacBook Pro, running macOS Catalina version 10.15.7, and having an 2.2 GHz Quad-Core Intel Core i7 and 16 of RAM. The installed software is the following:
 
