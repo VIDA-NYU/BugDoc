@@ -1,0 +1,3 @@
+{"fp": 35, "minimal": false, "algo": "dataxray", "tp": 6, "fn": 4}
+{"fp": 0, "minimal": true, "algo": "bugdoc", "tp": 20, "fn": 0}
+{"fp": 0, "minimal": true, "algo": "explanation", "tp": 2, "fn": 10}

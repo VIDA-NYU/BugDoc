@@ -119,7 +119,7 @@ class AutoDebug(object):
                     self.allexperiments.append(exp)
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
-                    x[-1] = x[-1]
+                    #x[-1] = x[-1]
                     self.allresults.append(x)
             else:
                 for tup in requests:

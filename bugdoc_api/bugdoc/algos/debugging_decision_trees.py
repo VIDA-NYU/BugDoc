@@ -286,7 +286,7 @@ class AutoDebug(object):
 
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
-                    x[-1] = x[-1]
+                    #x[-1] = x[-1]
                     result = x[-1]
                     # We could run the experiment
                     if result is not None:
