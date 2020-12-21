@@ -18,35 +18,35 @@ from parallel_evaluation import experiment_setup as parallel_setup
 for _ in range(5):
     os.system("python ../../test/python_worker.py & disown")
 
-count_setup.prepare(20,6)
+count_setup.prepare(20,5)
 count_setup.run()
 count_setup.read()
 
 
-all_setup.prepare(6,30)
+all_setup.prepare(5,20)
 all_setup.run()
 all_setup.read()
 all_setup.read_answers()
 
 
 
-all_shortcut_setup.prepare(6,30)
+all_shortcut_setup.prepare(5,20)
 all_shortcut_setup.run()
 all_shortcut_setup.read()
 
-all_stacked_setup.prepare(6,30)
+all_stacked_setup.prepare(5,20)
 all_stacked_setup.run()
 all_stacked_setup.read()
 
-one_setup.prepare(6,30)
+one_setup.prepare(5,20)
 one_setup.run()
 one_setup.read()
 
-one_shortcut_setup.prepare(6,30)
+one_shortcut_setup.prepare(5,20)
 one_shortcut_setup.run()
 one_shortcut_setup.read()
 
-one_stacked_setup.prepare(6,30)
+one_stacked_setup.prepare(5,20)
 one_stacked_setup.run()
 one_stacked_setup.read()
 
@@ -67,7 +67,7 @@ sender.close()
 context.term()
 
 
-parallel_setup.prepare(4,22)
+parallel_setup.prepare(4,15)
 parallel_setup.run()
 
 #real_setup.prepare()
