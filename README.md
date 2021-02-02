@@ -48,7 +48,7 @@ We provide the following script to make it easier for re-running our experiments
 
 It is important to note that, since the pipelines are generated randomly, the performance results and plots will be consistent but visually different from those published in the paper.
 
-Alternatively, we provide [ReproZip](https://vida-nyu.github.io/reprozip/) packages for the original plots published in the paper, where you can obtain the actual performance results. The ReproZip packages were mostly created on a Ubuntu 16.04 LTS machine, having the same versions for Python, matplotlib, and Postgres.
+Alternatively, we provide [ReproZip](https://vida-nyu.github.io/reprozip/) packages for the original plots published in the paper, where you can obtain the actual performance results. The ReproZip packages were mostly created on a Ubuntu 16.04 LTS machine, having the same versions for Python, matplotlib, and Postgres. Please download the reprozip package from [here](https://nyu.box.com/s/enflnbxz4yhkj8t0uxztk8tqydi90rfd).
 
 More detailed information about our experiments can be found in the following sections.
 
