@@ -11,7 +11,7 @@ from count_instances import experiment_setup as count_setup
 for _ in range(5):
     os.system("python ../../test/python_worker.py & disown")
 
-count_setup.prepare(20,6)
+count_setup.prepare(19,6)
 count_setup.run()
 count_setup.read()
 
