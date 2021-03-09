@@ -61,7 +61,7 @@ def plot_answer_sizes(experiements_path, alllines,name_fig,algos,labels, folders
     algo_index = 0
 
     for algo in algos:
-        ax.bar(index + (algo_index * bar_width), [solution[algo]['avg_size']/solution[algo]['count']], bar_width, edgecolor='black',
+        ax.bar(index + (algo_index * bar_width), [0.0 if algo not in solution else solution[algo]['avg_size']/solution[algo]['count']], bar_width, edgecolor='black',
                color=colors[algo_index % len(colors)], label=labels[algo_index], hatch=hatchs[algo_index % len(hatchs)])
         algo_index += 1
 
@@ -74,7 +74,7 @@ def plot_answer_sizes(experiements_path, alllines,name_fig,algos,labels, folders
     algo_index = 0
 
     for algo in algos:
-        ax.bar(index + (algo_index * bar_width), [np.log1p(solution[algo]['answers_per_root'] / solution[algo]['count'])], bar_width,
+        ax.bar(index + (algo_index * bar_width), [0.0 if algo not in solution else np.log1p(solution[algo]['answers_per_root'] / solution[algo]['count'])], bar_width,
                edgecolor='black',
                color=colors[algo_index % len(colors)], label=labels[algo_index], hatch=hatchs[algo_index % len(hatchs)])
         algo_index += 1
