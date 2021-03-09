@@ -176,7 +176,7 @@ for experiment in alllines:
         totals_trees_tmp = []
         totals_trees_stacked_tmp = []
 
-horizontal = [c for c in range(3,20) for b in range(5,6)]
+horizontal = [c for c in range(3,19) for b in range(5,6)]
 plt.plot(horizontal, totals_shortcut, color='#1f77b4',linestyle='-', label='Shortcut')
 plt.plot(horizontal, totals_trees_stacked, color='#ff7f0e',linestyle='--', label='Stacked Shorcut')
 plt.plot(horizontal, totals_trees, color='#2ca02c',linestyle='-.', label='Debugging Decision Trees')
