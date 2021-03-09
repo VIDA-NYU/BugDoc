@@ -25,7 +25,7 @@ def prepare(num_params, min_values):
     experiments_list_parallel = os.path.join(data_folder_parallel,'list.txt')
     experiments_list_parallel_file = open(experiments_list_parallel, "a")
     data_list = [experiment for experiment in data_list if
-                      int(experiment.split('_')[3]) == num_params and int(experiment.split('_')[4]) > min_values]
+                      int(experiment.split('_')[1]) == num_params and int(experiment.split('_')[2]) > min_values]
     for experiment_name in data_list:
 
         shutil.copy(os.path.join(data_folder,experiment_name[:-1]+'.json'), data_folder_parallel)
