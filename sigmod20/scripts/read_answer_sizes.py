@@ -223,7 +223,8 @@ def execute(experiements_path, algos, iterations):
         for experiment in alllines:
             experiment_name = os.path.join(experiements_path, experiment[:-1])
             print(experiment_name)
-            os.remove(experiment_name + "_%d.answers"%(max_iter))
+            if os.path.exists(experiment_name + "_%d.answers"%(max_iter)):
+                os.remove(experiment_name + "_%d.answers"%(max_iter))
             for algo in algos:
                 try:
                     record_algo_result(experiment_name,algo,max_iter)
