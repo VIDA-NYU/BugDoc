@@ -31,8 +31,7 @@ def record_algo_result(experiment_name, algo, max_iter):
         cur = db.cursor()
         directories = experiment_name.split('/')
         name = directories[-3] + "_" + directories[-2] + "_" + directories[-1]
-        if 'smac' in experiment_name:
-            name = 'smac_' + name
+
         sql = "SELECT * FROM %s_%d_richsummary;" %(name,max_iter)
         if exc(db,cur,sql):
             for row in cur:
