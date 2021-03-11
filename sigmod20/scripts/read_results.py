@@ -97,7 +97,7 @@ def record_algo_result(experiment_name, algo, max_iter):
                         answer_size += 1
                         value = (type(param_space[params[param_index]][0]))(row[param_index])
                         kw_args_space[params[param_index]] = [value]
-                if (answer_size == 0) or  not (row[len(params) + 2] == 1.0): continue
+                if (answer_size == 0) or not (row[len(params) + 2] == 1.0): continue
                 num_clauses = len(diag)
                 kw_args_list = load_combinatorial(kw_args_space)
                 check_diag(diag, kw_args_list, answer_size)

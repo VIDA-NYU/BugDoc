@@ -29,7 +29,8 @@ def record_algo_result(experiment_name, algo, max_iter):
 
         db = psycopg2.connect(dbname=dbconf['dbname'], user=dbconf['user'], password=dbconf['pass'])
         cur = db.cursor()
-        name = experiment_name.split('/')[-1]
+        directories = experiment_name.split('/')
+        name = directories[-3] + "_" + directories[-2] + "_" + directories[-1]
         if 'smac' in experiment_name:
             name = 'smac_' + name
         sql = "SELECT * FROM %s_%d_richsummary;" %(name,max_iter)
@@ -44,7 +45,7 @@ def record_algo_result(experiment_name, algo, max_iter):
                         answer_size += 1
                         value = (type(param_space[params[param_index]][0]))(row[param_index])
                         kw_args_space[params[param_index]] = [value]
-                if (answer_size == 0) or  not (row[len(params) + 2] == 1.0): continue
+                if (answer_size == 0) or not (row[len(params) + 2] == 1.0): continue
                 num_answers += 1
                 size_answers.append(answer_size)
         cur.close()
