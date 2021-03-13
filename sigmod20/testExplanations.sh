@@ -1,0 +1,2 @@
+cd scripts
+python test_explanations_db.py
