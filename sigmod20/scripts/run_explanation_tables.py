@@ -15,9 +15,9 @@ sys.path.append(os.path.join(os.getcwd(), '..'))
 import json
 
 
-def load_table(filename, input_keys, lims,max_iter):
+def load_table(filename, input_keys, lims):
     directories = filename.split('/')
-    name = directories[-3]+"_"+directories[-2]+"_"+directories[-1][:-4]+"_"+str(max_iter)
+    name = directories[-3][5:]+"_"+directories[-2][4:]+"_"+directories[-1][6:-4]
     print(name)
     if os.path.isfile(filename):
         fileicareabout = open(filename, "r")
@@ -81,10 +81,10 @@ def execute(experiements_path, max_iter=sys.maxsize, prev=0):
         keys = param_space.keys()
 
         lims = None if max_iter == sys.maxsize else [prev, prev + max_iter]
-        sql, rows = load_table(filename, keys, lims,max_iter)
+        sql, rows = load_table(filename, keys, lims)
         exc(db, cur, sql)
         directories = experiment_name.split('/')
-        name = directories[-3] + "_" + directories[-2] + "_" + directories[-1] + "_" + str(max_iter)
+        name = directories[-3][5:]+"_"+directories[-2][4:]+"_"+directories[-1][6:]
         try:
             explain_LL.run(name,rows,'4',db,cur)
         except:

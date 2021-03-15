@@ -30,9 +30,8 @@ def record_algo_result(experiment_name, algo, max_iter):
         db = psycopg2.connect(dbname=dbconf['dbname'], user=dbconf['user'], password=dbconf['pass'])
         cur = db.cursor()
         directories = experiment_name.split('/')
-        name = directories[-3] + "_" + directories[-2] + "_" + directories[-1]
-
-        sql = "SELECT * FROM %s_%d_richsummary;" %(name,max_iter)
+        name = directories[-3][5:] + "_" + directories[-2][4:] + "_" + directories[-1][6:]
+        sql = "SELECT * FROM %s_richsummary;" % name
         if exc(db,cur,sql):
             for row in cur:
                 kw_args_space = {}

@@ -84,8 +84,8 @@ def record_algo_result(experiment_name, algo, max_iter):
         db = psycopg2.connect(dbname=dbconf['dbname'], user=dbconf['user'], password=dbconf['pass'])
         cur = db.cursor()
         directories = experiment_name.split('/')
-        name = directories[-3] + "_" + directories[-2] + "_" + directories[-1]
-        sql = "SELECT * FROM %s_%d_richsummary;" %(name,max_iter)
+        name = directories[-3][5:]+"_"+directories[-2][4:]+"_"+directories[-1][6:]
+        sql = "SELECT * FROM %s_richsummary;" % name
         if exc(db,cur,sql):
             for row in cur:
                 kw_args_space = {}
@@ -414,6 +414,8 @@ def execute(experiements_path, algos, iterations):
         for experiment in alllines:
             experiment_name = os.path.join(experiements_path, experiment[:-1])
             print(experiment_name)
+            if os.path.exists(experiment_name + "_%d.agg" % (max_iter)):
+                os.remove(experiment_name + "_%d.agg" % (max_iter))
             for algo in algos:
                 try:
                     record_algo_result(experiment_name,algo,max_iter)
