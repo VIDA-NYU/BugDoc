@@ -1,4 +1,4 @@
-# BugDoc [![Build Status](https://travis-ci.org/VIDA-NYU/BugDoc.svg?branch=master)](https://travis-ci.org/VIDA-NYU/BugDoc)
+# BugDoc [![Build Status](https://travis-ci.org/VIDA-NYU/BugDoc.svg?branch=master)](https://travis-ci.org/VIDA-NYU/BugDoc) [![Docs Status](https://readthedocs.org/projects/bugdoc/badge/?version=latest&style=flat)](https://bugdoc.readthedocs.io/en/latest/)
 
 BugDoc is a framework for finding root causes of errors in computational pipelines.
 
