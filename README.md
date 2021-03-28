@@ -73,4 +73,4 @@ The experiments also assume a database instance with the following [configuratio
     $ debugdb=# CREATE ROLE raoni WITH LOGIN SUPERUSER PASSWORD 'password';
     $ debugdb=# CREATE LANGUAGE plpythonu;
     
-This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is good troubleshoot if the pyhton extension does not work. 
+This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is a good troubleshoot if the pyhton extension does not work. 
