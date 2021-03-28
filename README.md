@@ -64,4 +64,13 @@ All the files related to the experiments are located under [``sigmod20/``](sigmo
 
 #### 2.1.1 PostgresSQL Configuration
 
-The experiments also assume a database instance with the following [configuration](sigmod20/experiments/db.conf). Additionally, the specified user must be *superuser* in the specified database, and the *plpythonu* language extension should be created. Please refer to the official [instructions](https://www.postgresql.org/docs/11/sql-createlanguage.html). 
+The experiments also assume a database instance with the following [configuration](sigmod20/experiments/db.conf). Additionally, the specified user must be *superuser* in the specified database, and the *plpythonu* language extension should be created. Please refer to the official [instructions](https://www.postgresql.org/docs/11/sql-createlanguage.html). The following are the most common steps to install the extension:
+
+    $ brew tap petere/postgresql
+    $ brew install petere/postgresql/postgresql@11
+    $ createdb debugdb
+    $ psql debugdb
+    $ debugdb=# CREATE ROLE raoni WITH LOGIN SUPERUSER PASSWORD 'password';
+    $ debugdb=# CREATE LANGUAGE plpythonu;
+    
+This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is good troubleshoot if the pyhton extension does not work. 
