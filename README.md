@@ -72,5 +72,22 @@ The experiments also assume a database instance with the following [configuratio
     $ psql debugdb
     $ debugdb=# CREATE ROLE raoni WITH LOGIN SUPERUSER PASSWORD 'password';
     $ debugdb=# CREATE LANGUAGE plpythonu;
+
+To test *plpythonu*, please do the following:
+    
+    $ psql -U raoni -W debugdb
+    $ debugdb=# CREATE FUNCTION pymax (a integer, b integer)
+          RETURNS integer
+          AS $$
+             if a > b:
+                 return a
+             return b
+          $$ LANGUAGE plpythonu;
+      CREATE FUNCTION
+    $ debugdb=# select pymax(1, 2);
+       pymax
+      -------
+         2
+      (1 row)
     
 This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is a good troubleshoot if the pyhton extension does not work. 
