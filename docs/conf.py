@@ -35,7 +35,8 @@ master_doc = 'index'
 extensions = [
     'sphinx.ext.autodoc',
     'nbsphinx',
-    'nbsphinx_link'
+    'nbsphinx_link',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -65,3 +66,10 @@ autodoc_member_order = 'bysource'
 autoclass_content = 'both'
 
 add_module_names = False
+
+sphinx_gallery_conf = {
+     'examples_dirs': '../examples',   # path to your example scripts
+     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+     'ignore_pattern': r'my_api_example\.py',
+}
+

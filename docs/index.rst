@@ -19,7 +19,8 @@ You can find the source code on GitHub: https://github.com/VIDA-NYU/BugDoc
 
    installation
    getting-started
-
+   api
+   auto_examples/index
 
 
 Indices and tables
