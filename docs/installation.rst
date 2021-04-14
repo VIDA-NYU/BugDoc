@@ -2,7 +2,7 @@ Installation
 ============
 
 Linux/Mac
----------
+----------
 
 This package works with Python 3.6 or greater.
 You can install the latest stable version of this library directly from `PyPI <https://pypi.org/project/bugdoc/>`__ using PIP::

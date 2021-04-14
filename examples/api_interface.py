@@ -8,7 +8,7 @@ It runs and evaluates the pipeline instances, and returns the result to BugDoc.
 
 # %%
 # Importing necessary packages.
-# ------------------------
+# -----------------------------
 # We load utility packages to open communication and store pipeline instances.
 
 import ast
@@ -19,7 +19,7 @@ from bugdoc.utils.utils import record_pipeline_run
 
 # %%
 # Importing pipeline engine API.
-# ------------------------
+# ------------------------------
 # Here we load the functions that execute and evaluate a pipeline instance.
 from my_api_example import execute_pipeline, evaluate_pipeline_output
 

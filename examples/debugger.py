@@ -9,14 +9,14 @@ This script defines the pipeline entry point, the parameter-space,
 
 # %%
 # Importing algorithm from BugDoc's API
-# ------------------------
+# --------------------------------------
 # We choose the Stacked Shortcut Algorithm to debug the pipeline.
 
 from bugdoc.algos.stacked_shortcut import AutoDebug as StackedShortcut
 
 # %%
 # Parameter space definition
-# ------------------------
+# ---------------------------
 # The parameter-values that BugDoc's tries can be retrieved in two ways.
 # From previous executions of the pipeline or specifying the all possible values each parameter can take.
 # In the following, we provide the entry point of the pipeline and a dictionary with the parameter names as keys
@@ -67,7 +67,7 @@ result = debugger.run(filename, parameter_space)
 
 # %%
 # Revealing the root cause
-# ------------------------
+# -------------------------
 # When the algorithm finishes we can display the root cause of error.
 
 root, _, _ = result

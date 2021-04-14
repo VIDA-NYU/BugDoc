@@ -18,6 +18,7 @@ You can find the source code on GitHub: https://github.com/VIDA-NYU/BugDoc
    :caption: Contents:
 
    installation
+   definitions
    getting-started
    api
    auto_examples/index
