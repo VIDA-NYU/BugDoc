@@ -4,6 +4,10 @@ API
 Debugging Algorithms
 --------------------
 
+.. module:: bugdoc.algos.base
+..  autoclass:: Debugger
+    :members:
+
 .. module:: bugdoc.algos.stacked_shortcut
 ..  autoclass:: StackedShortcut
     :members:

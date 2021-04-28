@@ -21,6 +21,7 @@ from bugdoc.utils.utils import record_pipeline_run
 # Importing pipeline engine API.
 # ------------------------------
 # Here we load the functions that execute and evaluate a pipeline instance.
+# Please replace with your own API
 from my_api_example import execute_pipeline, evaluate_pipeline_output
 
 
@@ -51,8 +52,8 @@ while True:
             parameters[i]: values[i]
             for i in range(len(parameters))
         }
-        output = execute_pipeline(filename, configuration)
-        result = evaluate_pipeline_output(output)
+        output = execute_pipeline(filename, configuration) # Please replace this function call
+        result = evaluate_pipeline_output(output) # Please replace this function call
     except:
         traceback.print_exc(file=sys.stdout)
         result = False

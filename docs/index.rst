@@ -22,6 +22,7 @@ You can find the source code on GitHub: https://github.com/VIDA-NYU/BugDoc
    getting-started
    api
    auto_examples/index
+   client
 
 
 Indices and tables
