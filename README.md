@@ -33,8 +33,29 @@ Given a set of computational pipeline instances, some of which led to bad or que
 We are currently managing contributions by [issues](https://github.com/VIDA-NYU/BugDoc/issues), more detailed procedure 
 will be included soon.
 
-## 1. How To Build
+# How To Build
+This package works with Python 3.6 or greater.
 
-To install latest development version:
+## Installing the API
+
+To install latest development version of BugDoc's API:
 
     $ pip install -e bugdoc_api
+
+## Installing the Command-line interface
+To install the simple command-line interface:
+
+    $ pip install -e bugdoc_cli
+
+# Installing from PyPI
+
+You can install the latest stable version of BugDoc's API 
+library directly from [PyPI](https://pypi.org/project/bugdoc/) using PIP.
+
+    $ pip install bugdoc
+
+# Documentation
+
+The documentation of BugDoc's API with some examples can be found [here](https://bugdoc.readthedocs.io/en/latest/).
+
+

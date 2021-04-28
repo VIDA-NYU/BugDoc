@@ -6,7 +6,7 @@ import pytest
 import zmq
 import bugdoc.utils.tree as _tree
 
-from bugdoc.algos.debugging_decision_trees import AutoDebug
+from bugdoc.algos.debugging_decision_trees import DebuggingDecisionTrees
 from bugdoc.utils.quine_mccluskey import prune_tree
 
 
@@ -35,7 +35,7 @@ class TestBudget(object):
         filename = 'test/test_diagnosis.vt'
         outputs = ['result']
 
-        believedecisive, t, total = AutoDebug().run(filename, space, outputs)
+        believedecisive, t, total = DebuggingDecisionTrees().run(filename, space, outputs=outputs)
         if _tree.get_depth(t) > 0:
             keys = list(space.keys())
             result = prune_tree(t, keys)
