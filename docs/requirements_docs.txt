@@ -5,4 +5,4 @@ pandoc
 sphinx_rtd_theme
 sphinx-gallery
 ipykernel
-bugdoc
+bugdoc @ git+https://github.com/VIDA-NYU/BugDoc.git@master#egg=bugdoc&subdirectory=bugdoc_api
