@@ -4,3 +4,4 @@ nbsphinx-link
 pandoc
 sphinx_rtd_theme
 sphinx-gallery
+ipykernel
