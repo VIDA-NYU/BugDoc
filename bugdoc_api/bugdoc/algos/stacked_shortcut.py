@@ -38,7 +38,7 @@ import zmq
 import ast
 import time
 from bugdoc.algos.base import Debugger
-from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
+from bugdoc.utils.utils import load_runs, load_combinatorial
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -87,10 +87,9 @@ class StackedShortcut(Debugger):
             return [cgs, cf]
         return []
 
-    def run(self, filename, input_dict, outputs=['results']):
-        super().run(filename, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, _ = load_runs(self.filename.replace(".vt", ".adb"),
-                                                                           self.my_inputs)
+    def run(self, entry_point, input_dict, outputs=['results']):
+        super().run(entry_point, input_dict, outputs=outputs)
+        self.allexperiments, self.allresults, _ = load_runs(self.entry_point + ".adb", self.my_inputs)
         logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
@@ -208,9 +207,13 @@ class StackedShortcut(Debugger):
         return self.believeddecisive, len(self.allexperiments), (len(self.allexperiments) - initial_experiments_num)
 
 
-    def __init__(self, created_instances=False, k=numtests, max_iter=1000, origin=None, separator="|"):
+    def __init__(self, created_instances=False, k=4, max_iter=1000, origin=None, separator="|",
+                 send="5557", receive="5558"):
         super(StackedShortcut, self).__init__(max_iter=max_iter,
                                        origin=origin,
-                                       separator=separator)
+                                       separator=separator,
+                                       send=send,
+                                       receive=receive
+                                       )
         self.created_instances = created_instances
         self.k = k

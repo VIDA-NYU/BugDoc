@@ -1,0 +1,59 @@
+{
+  "entry_point": "my_pipeline",
+  "python_module": "my_api_example",
+  "run": "execute_pipeline",
+  "parameters": [
+    {
+      "name": "operator1_script",
+      "values": [
+        "/data/scripts/operator1/script1.py",
+        "/data/scripts/operator1/script2.py",
+        "/data/scripts/operator1/script3.py",
+        "/data/scripts/operator1/script4.py",
+        "/data/scripts/operator1/script5.py",
+        "/data/scripts/operator1/script6.py",
+        "/data/scripts/operator1/script7.py",
+        "/data/scripts/operator1/script8.py",
+        "/data/scripts/operator1/script9.py"
+      ]
+    },
+    {
+      "name":"read_path",
+      "values": [
+        "/tmp/inputs_20200527.csv",
+        "/tmp/inputs_20200528.csv",
+        "/tmp/inputs_20200529.csv",
+        "/tmp/inputs_20200530.csv",
+        "/tmp/inputs_20200531.csv"
+    ]
+    },
+    {
+      "name": "read_mode",
+      "values": ["once", "repeat"]
+    },
+    {
+      "name": "write_mode",
+      "values": ["append", "concat", "replace"]
+    },
+   {
+      "name": "operator2_script",
+      "values": [
+        "/data/scripts/operator2/aggregation.py",
+        "/data/scripts/operator2/average.py",
+        "/data/scripts/operator2/reduce.py"
+    ]
+    },
+    {
+      "name": "threshold",
+      "values": [0.1, 0.5]
+    },
+    {
+      "name": "folds",
+      "values": [2, 5, 10]
+    },
+    {
+      "name": "write_mode",
+      "values": ["append", "concat", "replace"]
+    }
+  ]
+  }

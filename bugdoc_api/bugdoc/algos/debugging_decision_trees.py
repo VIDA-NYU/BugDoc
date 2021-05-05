@@ -241,9 +241,9 @@ class DebuggingDecisionTrees(Debugger):
 
         return False
 
-    def run(self, filename, input_dict, outputs=['results'], rebuild=True):
-        super().run(filename, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(filename.replace(".vt", ".adb"),
+    def run(self, entry_point, input_dict, outputs=['results'], rebuild=True):
+        super().run(entry_point, input_dict, outputs=outputs)
+        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point + ".adb",
                                                                            self.my_inputs)
         logging.debug("pv_goodness is: " + str(self.pv_goodness))
         logging.debug("allresults is: " + str(self.allresults))
@@ -339,7 +339,7 @@ class DebuggingDecisionTrees(Debugger):
 
 
     def __init__(self, return_num_instances=False, first_solution=False, num_tests=10000, use_score=False,
-                 max_iter=10000, origin=None, separator="|"):
+                 max_iter=10000, origin=None, separator="|", send="5557", receive="5558"):
         """ Build a new debugging debugging decision trees algorithm object.
 
         Parameters
@@ -354,8 +354,11 @@ class DebuggingDecisionTrees(Debugger):
             parameter-values appears.
         """
         super(DebuggingDecisionTrees, self).__init__(max_iter=max_iter,
-                                       origin=origin,
-                                       separator=separator)
+                                                     origin=origin,
+                                                     separator=separator,
+                                                     send=send,
+                                                     receive=receive
+                                                     )
         self.created_instances = return_num_instances
         self.puregoodlist = []
         self.purebadlist = []

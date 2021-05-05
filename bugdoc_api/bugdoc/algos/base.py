@@ -57,7 +57,7 @@ class Debugger(object):
         receive: str
             Socket port used to receive messages from worker.
         """
-        self.filename = None
+        self.entry_point = None
         self.allexperiments = []
         self.allresults = []
         self.believeddecisive = []
@@ -85,13 +85,13 @@ class Debugger(object):
         self.cohort = 0
         self.separator = separator
 
-    def run(self, filename, input_dict, outputs=['results']):
+    def run(self, entry_point, input_dict, outputs=['results']):
         self.my_inputs = list(input_dict.keys())
         self.my_outputs = outputs
-        self.filename = filename
+        self.entry_point = entry_point
 
     def _workflow(self, parameter_list):
-        message = self.filename
+        message = self.entry_point
         message += self.separator + str(parameter_list)
         message += self.separator + str(list(self.my_inputs))
         message += self.separator + str(self.my_outputs)

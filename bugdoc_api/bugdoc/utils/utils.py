@@ -182,6 +182,15 @@ def record_python_run(paramDict, vistrail_name, origin=None):
 
 
 def record_pipeline_run(filename,values,parameters,result, origin=None):
+    """
+
+    :param filename:
+    :param values:
+    :param parameters:
+    :param result:
+    :param origin:
+    :return:
+    """
     paramDict = {
         parameters[i] : values[i]
         for i in range(len(parameters))
@@ -190,8 +199,7 @@ def record_pipeline_run(filename,values,parameters,result, origin=None):
 
     if origin:
         paramDict["origin"] = origin
-    file_name = filename.replace('.vt', '.adb')
-    f = open(file_name, "a")
-    f.write(json.dumps(str(paramDict)) + '\n')
+    f = open(filename, "a")
+    f.write(json.dumps(paramDict) + '\n')
     f.close()
 

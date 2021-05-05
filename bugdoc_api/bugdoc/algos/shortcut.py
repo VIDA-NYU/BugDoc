@@ -63,10 +63,9 @@ class Shortcut(Debugger):
                     return [cg, cf]
         return [random.choice(goodlist), random.choice(badlist)]
 
-    def run(self, filename, input_dict, outputs=['results']):
-        super().run(filename, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, _ = load_runs(self.filename.replace(".vt", ".adb"),
-                                                                           self.my_inputs)
+    def run(self, entry_point, input_dict, outputs=['results']):
+        super().run(entry_point, input_dict, outputs=outputs)
+        self.allexperiments, self.allresults, _ = load_runs(self.entry_point + ".adb", self.my_inputs)
         # logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
@@ -187,8 +186,11 @@ class Shortcut(Debugger):
         return self.believeddecisive, len(self.allexperiments)
 
 
-    def __init__(self, max_iter=1000, origin=None, separator="|"):
+    def __init__(self, max_iter=1000, origin=None, separator="|", send="5557", receive="5558"):
         super(Shortcut, self).__init__(max_iter=max_iter,
                                        origin=origin,
-                                       separator=separator)
+                                       separator=separator,
+                                       send=send,
+                                       receive=receive
+                                       )
 

@@ -9,13 +9,14 @@ Simple command-line interface
 This command-line tool can be found and installed from
 the main `BugDoc` `repository <https://github.com/VIDA-NYU/BugDoc/tree/master/bugdoc_cli>`_.
 
-usage: bugdoc-cli [-h] [--file FILE] [--budget BUDGET] [--params PARAMS]
-                  [--output OUTPUT]
+usage: bugdoc-cli [-h] -f FILE [--budget BUDGET] [--send SEND]
+                  [--receive RECEIVE] [--workers WORKERS]
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --file FILE      path to pipeline entry point
-  --budget BUDGET  maximum number of pipeline instances
-  --params PARAMS  path to json with parameters and values to be investigated
-  --output OUTPUT  path to file where results will written to
+  -h, --help            show this help message and exit
+  -f FILE, --file FILE  path to a configuration file describing the pipeline
+  --budget BUDGET       maximum number of pipeline instances
+  --send SEND           Socket port used to send messages to worker
+  --receive RECEIVE     Socket port used to receive messages from worker
+  --workers WORKERS     number of parallel workers to execute pipelines
 

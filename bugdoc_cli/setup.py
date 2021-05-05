@@ -19,7 +19,9 @@ setup(name='bugdoc-cli',
       packages=packages,
       entry_points={
           'console_scripts': [
-              'bugdoc-cli = main:run']
+              'bugdoc-cli = main:run',
+              'bugdoc-cli-worker = bugdoc_cli_worker:main'
+          ]
       },
       install_requires=req,
       description="BugDoc Command Line Interface",

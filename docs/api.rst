@@ -19,3 +19,9 @@ Debugging Algorithms
 .. module:: bugdoc.algos.debugging_decision_trees
 ..  autoclass:: DebuggingDecisionTrees
     :members:
+
+Utils
+------
+
+.. automodule:: bugdoc.utils.utils
+    :members:
