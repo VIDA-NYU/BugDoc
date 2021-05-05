@@ -5,3 +5,4 @@ pandoc
 sphinx_rtd_theme
 sphinx-gallery
 ipykernel
+bugdoc
