@@ -23,7 +23,7 @@ req = ['pytest-cov',
        'Pillow',
        'image',
        'nose==1.3.7',
-       'Django == 1.11.29']
+       'Django == 2.2.24']
 
 
 setup(name='bugdoc',
