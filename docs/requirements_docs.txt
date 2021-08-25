@@ -1,0 +1,8 @@
+sphinx
+nbsphinx
+nbsphinx-link
+pandoc
+sphinx_rtd_theme
+sphinx-gallery
+ipykernel
+bugdoc @ git+https://github.com/VIDA-NYU/BugDoc.git@master#egg=bugdoc&subdirectory=bugdoc_api

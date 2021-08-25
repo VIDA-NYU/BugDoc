@@ -41,16 +41,22 @@ import zmq
 from builtins import zip
 from builtins import str
 from builtins import range
-from builtins import object
+from bugdoc.algos.base import Debugger
 from bugdoc.utils.utils import load_runs, compute_score, load_combinatorial, load_permutations
 from future import standard_library
 from six import string_types
 
 standard_library.install_aliases()
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
-class AutoDebug(object):
+class DebuggingDecisionTrees(Debugger):
+    """ Creates pipeline instances to be run based on a decision tree fitted on execution history and finds root causes of failing.
+
+    This algorithm fits a decision tree using parameters as features and results of pipelines as target.
+    The results are boolean evaluations of success (True) or fail (False). It takes an entry point of
+    a pipeline and a description of the parameter space to generate new instances and return root causes of failing.
+    """
 
     def determinenodepurity(self, node, path):
         if node.results is None:
@@ -181,15 +187,13 @@ class AutoDebug(object):
         for i in indices:
             if (len(self.allexperiments) + len(requests)) < self.max_iter:
                 e = experiments[i]
-                self.workflow(e)
+                self._workflow(e)
                 if self.is_poller_not_sync:
                     time.sleep(1)
                     self.is_poller_not_sync = False
                 requests.add(str(e))
 
         while len(requests) > 0:
-            if len(requests) > self.max_instances:
-                self.max_instances = len(requests)
             socks = dict(self.poller.poll(1000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
@@ -222,7 +226,7 @@ class AutoDebug(object):
             else:
                 for tup in requests:
                     exp = list(tup)
-                    # self.workflow(exp)
+                    # self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
                         self.is_poller_not_sync = False
@@ -237,11 +241,9 @@ class AutoDebug(object):
 
         return False
 
-    def run(self, filename, input_dict, outputs=['results'], rebuild=True):
-        self.my_inputs = list(input_dict.keys())
-        self.my_outputs = outputs
-        self.filename = filename
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(filename.replace(".vt", ".adb"),
+    def run(self, entry_point, input_dict, outputs=['results'], rebuild=True):
+        super().run(entry_point, input_dict, outputs=outputs)
+        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point + ".adb",
                                                                            self.my_inputs)
         logging.debug("pv_goodness is: " + str(self.pv_goodness))
         logging.debug("allresults is: " + str(self.allresults))
@@ -256,15 +258,13 @@ class AutoDebug(object):
                 exp.append(value)
             if ([p for p in exp] not in self.expers):
                 if (len(self.allexperiments) + len(requests)) < self.max_iter:
-                    self.workflow(exp)
+                    self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
                         self.is_poller_not_sync = False
                     requests.add(str(exp))
 
         while len(requests) > 0:
-            if len(requests) > self.max_instances:
-                self.max_instances = len(requests)
             socks = dict(self.poller.poll(10000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
@@ -294,7 +294,7 @@ class AutoDebug(object):
             else:
                 for tup in requests:
                     exp = list(tup)
-                    # self.workflow(exp)
+                    # self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
                         self.is_poller_not_sync = False
@@ -313,8 +313,6 @@ class AutoDebug(object):
             logging.debug("allexperiments are: " + str(self.allexperiments))
             t = tree.build(self.allresults, cols=self.cols)
             # tree.draw_tree(t)
-            if self.window:
-                self.window.updateTree()
             if self.first_solution:
                 _, badpath = self.findshoertestpaths(t)
                 if badpath:
@@ -328,67 +326,46 @@ class AutoDebug(object):
         self.mixedlist = []
         t = tree.build(self.allresults, cols=self.cols)
         # tree.draw_tree(t)
-        if self.window:
-            self.window.updateTree()
         logging.debug("length of all experiments is: " + str(len(self.allexperiments)))
         # logging.debug("The current goodness count is: " + str(self.pv_goodness))
         self.poller.unregister(self.receiver)
         self.receiver.close()
         self.sender.close()
         self.context.term()
-        if self.return_max_instances:
-            return self.believeddecisive, t, len(self.allexperiments), self.max_instances
         if self.created_instances:
             return (len(self.allexperiments) - initial_experiments_num)
         return self.believeddecisive, t, len(self.allexperiments)
 
-    def workflow(self, parameter_list):
-        message = self.filename
-        message += self.separator + str(parameter_list)
-        message += self.separator + str(list(self.my_inputs))
-        message += self.separator + str(self.my_outputs)
-        if self.origin:
-            message += self.separator + str(self.origin) + "_trees_" + str(self.cohort)
-        self.sender.send_string(message)
 
-    def __init__(self, created_instances=False, first_solution=False, max_iter=10000, return_max_instances=False,
-                 k=10000, use_score=False, window=None, origin=None, separator="|"):
-        self.created_instances = created_instances
-        self.filename = None
+
+    def __init__(self, return_num_instances=False, first_solution=False, num_tests=10000, use_score=False,
+                 max_iter=10000, origin=None, separator="|", send="5557", receive="5558"):
+        """ Build a new debugging debugging decision trees algorithm object.
+
+        Parameters
+        ----------
+        return_num_instances: bool
+            Whether return the number of new instances were created or not.
+        num_tests: int
+            Maximum number of instances to run in each iteration of the algorithm.
+        use_score: bool
+            Whether using a goodness score to order the instances to be run. The goodness score, for each
+            parameter-value, is defined by the ratio of successful and failing instances in which a given
+            parameter-values appears.
+        """
+        super(DebuggingDecisionTrees, self).__init__(max_iter=max_iter,
+                                                     origin=origin,
+                                                     separator=separator,
+                                                     send=send,
+                                                     receive=receive
+                                                     )
+        self.created_instances = return_num_instances
         self.puregoodlist = []
         self.purebadlist = []
         self.mixedlist = []
-        self.allexperiments = []
-        self.allresults = []
         self.cost = '1'
         self.cols = []
-        self.believeddecisive = []
-        self.expers = []
-        self.myalllists = []
-        self.rets = []
-        self.my_inputs = []
-        self.my_outputs = []
         self.pv_goodness = {}
-        self.context = zmq.Context()
         self.first_solution = first_solution
-        self.max_iter = max_iter
-        self.return_max_instances = return_max_instances
-        self.max_instances = 0
-        self.k = k
+        self.k = num_tests
         self.use_score = use_score
-        self.window = window
-
-        # Socket to send messages on
-        self.sender = self.context.socket(zmq.PUSH)
-        self.sender.bind("tcp://*:5557")
-
-        # Socket with direct access to the sink: used to syncronize start of batch
-        self.receiver = self.context.socket(zmq.PULL)
-        self.receiver.bind("tcp://*:5558")
-
-        self.poller = zmq.Poller()
-        self.poller.register(self.receiver, zmq.POLLIN)
-        self.is_poller_not_sync = True
-        self.origin = origin
-        self.cohort = 0
-        self.separator = separator

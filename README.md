@@ -1,4 +1,4 @@
-# BugDoc [![Build Status](https://travis-ci.org/VIDA-NYU/BugDoc.svg?branch=master)](https://travis-ci.org/VIDA-NYU/BugDoc)
+# BugDoc [![Build Status](https://travis-ci.org/VIDA-NYU/BugDoc.svg?branch=master)](https://travis-ci.org/VIDA-NYU/BugDoc) [![Docs Status](https://readthedocs.org/projects/bugdoc/badge/?version=latest&style=flat)](https://bugdoc.readthedocs.io/en/latest/)
 
 BugDoc is a framework for finding the root causes of errors in computational pipelines.
 
@@ -31,13 +31,33 @@ Given a set of computational pipeline instances, some of which led to bad or que
 We are currently managing contributions by [issues](https://github.com/VIDA-NYU/BugDoc/issues), more detailed procedure 
 will be included soon.
 
-## 1. How To Build
+# How To Build
+This package works with Python 3.6 or greater.
 
-To install latest development version:
+## Installing the API
+
+To install latest development version of BugDoc's API:
 
     $ pip install -e bugdoc_api
+
+## Installing the Command-line interface
+To install the simple command-line interface:
+
+    $ pip install -e bugdoc_cli
+
+# Installing from PyPI
+
+You can install the latest stable version of BugDoc's API 
+library directly from [PyPI](https://pypi.org/project/bugdoc/) using PIP.
+
+    $ pip install bugdoc
+
+# Documentation
+
+The documentation of BugDoc's API with some examples can be found [here](https://bugdoc.readthedocs.io/en/latest/).
+
     
-## 2. Experiments
+# Experiments
 
 In this branch, we show how to reproduce the results of our SIGMOD'20 paper.
 
@@ -52,7 +72,7 @@ Alternatively, we provide [ReproZip](https://vida-nyu.github.io/reprozip/) packa
 
 More detailed information about our experiments can be found in the following sections.
 
-### 2.1. Machine Configuration
+## Machine Configuration
 
 The experiments were executed on a MacBook Pro, running macOS Catalina version 10.15.7, and having a 2.2 GHz Quad-Core Intel Core i7 and 16 of RAM. The installed software is the following:
 
@@ -62,7 +82,7 @@ The experiments were executed on a MacBook Pro, running macOS Catalina version 1
 
 All the files related to the experiments are located under [``sigmod20/``](sigmod20). All the scripts assume that this software is installed correctly.
 
-#### 2.1.1 PostgresSQL Configuration
+### PostgresSQL Configuration
 
 The experiments also assume a database instance with the following [configuration](sigmod20/experiments/db.conf). Additionally, the specified user must be *superuser* in the specified database, and the *plpythonu* language extension should be created. Please refer to the official [instructions](https://www.postgresql.org/docs/11/sql-createlanguage.html). The following are the most common steps to install the extension:
 
@@ -90,4 +110,4 @@ To test *plpythonu*, please do the following:
          2
       (1 row)
     
-This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is a good troubleshoot if the pyhton extension does not work. 
+This [post](https://dev.nextthought.com/blog/2018/09/getting-started-with-pgsql-plpythonu.html) is a good troubleshoot if the pyhton extension does not work.

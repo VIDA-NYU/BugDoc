@@ -38,12 +38,13 @@ import zmq
 import ast
 import time
 import random
+from bugdoc.algos.base import Debugger
 from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
-class AutoDebug(object):
+class Shortcut(Debugger):
 
     def determinepurity(self, myarr, mytarg):
         goodlist = []
@@ -62,12 +63,9 @@ class AutoDebug(object):
                     return [cg, cf]
         return [random.choice(goodlist), random.choice(badlist)]
 
-    def run(self, filename, input_dict, outputs):
-        self.my_inputs = input_dict.keys()
-        self.my_outputs = outputs
-        self.filename = filename
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.filename.replace(".vt", ".adb"),
-                                                                           self.my_inputs)
+    def run(self, entry_point, input_dict, outputs=['results']):
+        super().run(entry_point, input_dict, outputs=outputs)
+        self.allexperiments, self.allresults, _ = load_runs(self.entry_point + ".adb", self.my_inputs)
         # logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
@@ -78,15 +76,13 @@ class AutoDebug(object):
                 value = d[param]
                 exp.append(value)
             if exp not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
-                self.workflow(exp)
+                self._workflow(exp)
                 if self.is_poller_not_sync:
                     time.sleep(1)
                     self.is_poller_not_sync = False
                 requests.add(str(exp))
 
         while len(requests) > 0:
-            if len(requests) > self.max_instances:
-                self.max_instances = len(requests)
             socks = dict(self.poller.poll(10000))
             if socks:
                 if socks.get(self.receiver) == zmq.POLLIN:
@@ -104,7 +100,7 @@ class AutoDebug(object):
                 for tup in requests:
                     exp = list(tup)
                     # TODO check if we need to resend experiments
-                    # self.workflow(exp)
+                    # self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
                         self.is_poller_not_sync = False
@@ -127,7 +123,7 @@ class AutoDebug(object):
                 result = False
                 if cf_aux not in self.expers:
 
-                    self.workflow(cf_aux)
+                    self._workflow(cf_aux)
 
                     if self.is_poller_not_sync:
                         time.sleep(1)
@@ -136,8 +132,6 @@ class AutoDebug(object):
                     requests.add(str(cf_aux))
 
                     while len(requests) > 0:
-                        if len(requests) > self.max_instances:
-                            self.max_instances = len(requests)
                         socks = dict(self.poller.poll(10000))
                         if socks:
                             if socks.get(self.receiver) == zmq.POLLIN:
@@ -155,7 +149,7 @@ class AutoDebug(object):
                             for tup in requests:
                                 exp = list(tup)
                                 # TODO check if we need to resend experiments
-                                # self.workflow(exp)
+                                # self._workflow(exp)
                                 if self.is_poller_not_sync:
                                     time.sleep(1)
                                     self.is_poller_not_sync = False
@@ -189,50 +183,14 @@ class AutoDebug(object):
         self.sender.close()
         self.context.term()
 
-        if self.return_max_instances:
-            return self.believeddecisive, len(self.allexperiments), self.max_instances
         return self.believeddecisive, len(self.allexperiments)
 
-    def workflow(self, parameter_list):
-        message = self.filename
-        message += self.separator + str(parameter_list)
-        message += self.separator + str(list(self.my_inputs))
-        message += self.separator + str(self.my_outputs)
-        if self.origin:
-            message += self.separator + str(self.origin) + "_shortcut_" + str(self.cohort)
-        self.sender.send_string(message)
 
-    def __init__(self, first_solution=False, max_iter=1000, return_max_instances=False, k=numtests, use_score=False,
-                 origin=None, separator="|"):
-        self.filename = None
-        self.allexperiments = []
-        self.allresults = []
-        self.believeddecisive = []
-        self.expers = []
-        self.myalllists = []
-        self.rets = []
-        self.my_kwargs = {}
-        self.my_inputs = []
-        self.pv_goodness = {}
-        self.my_outputs = []
-        self.context = zmq.Context()
-        self.first_solution = first_solution
-        self.max_iter = max_iter
-        self.return_max_instances = return_max_instances
-        self.max_instances = 0
-        self.k = k
-        self.use_score = use_score
-        # Socket to send messages on
-        self.sender = self.context.socket(zmq.PUSH)
-        self.sender.bind("tcp://*:5557")
+    def __init__(self, max_iter=1000, origin=None, separator="|", send="5557", receive="5558"):
+        super(Shortcut, self).__init__(max_iter=max_iter,
+                                       origin=origin,
+                                       separator=separator,
+                                       send=send,
+                                       receive=receive
+                                       )
 
-        # Socket with direct access to the sink: used to syncronize start of batch
-        self.receiver = self.context.socket(zmq.PULL)
-        self.receiver.bind("tcp://*:5558")
-
-        self.poller = zmq.Poller()
-        self.poller.register(self.receiver, zmq.POLLIN)
-        self.is_poller_not_sync = True
-        self.origin = origin
-        self.cohort = 0
-        self.separator = separator
