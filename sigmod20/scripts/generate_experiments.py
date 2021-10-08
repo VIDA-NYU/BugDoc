@@ -6,7 +6,7 @@ import json
 import shutil
 
 
-param_types = [list,int,float]
+param_types = [int,float]
 #param_types = [list] #this is just for the shortcut
 
 def clause_generator(param_space):
@@ -20,11 +20,11 @@ def clause_generator(param_space):
         else:
             v = random.choice(param_space[key])
             if v == min(param_space[key]):
-                cp = random.choice(["==",">="])
+                cp = random.choice([">="])
             elif v == max(param_space[key]):
-                cp = random.choice(["==","<"])
+                cp = random.choice(["<"])
             else:
-                cp = random.choice(["==",">=","<"])
+                cp = random.choice([">=","<"])
             clause[key] = {'v': v,'cp':cp}
     return clause
 
@@ -38,7 +38,7 @@ def generate_diagnosis(param_space, stop_probability):
             if len(clause) > max_clause:
                 max_clause = len(clause)
             diagnosis.append(clause)
-            if len(diagnosis) > 3:
+            if len(diagnosis) > 1:
                 break
    
     return diagnosis, max_clause
@@ -68,7 +68,7 @@ def generate_workflow(param_space, diagnosis, filename,  engine = 'python'):
         vt.close()
 
 
-def generate(num_params, num_values,output_folder):
+def generate(num_params, num_values,output_folder, min_params=3):
 
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
@@ -76,10 +76,10 @@ def generate(num_params, num_values,output_folder):
 
     experiments_list_path = output_folder+'/list.txt'
     experiments_list_file = open(experiments_list_path,"a")
-    for num_params in range(3,num_params):
-        for len_param_values in range(5,num_values):
+    for num_params in [2,4,8,16,32]:#range(min_params,num_params):
+        for len_param_values in range(4,5):
             param_space = generate_param_space(num_params,len_param_values)
-            for i in range(1,4):
+            for i in range(1,5):
                 diag, max_clause = generate_diagnosis(param_space,0.1*i)
                 workflow_name = "%s/space_%d_%d_%d_%d_%d"%(output_folder,num_params,len_param_values,i,len(diag),max_clause)
                 generate_workflow(param_space,diag, workflow_name)

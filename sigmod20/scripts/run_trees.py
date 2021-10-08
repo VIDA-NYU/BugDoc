@@ -1,6 +1,6 @@
 import sys, ast,traceback
 import json
-from bugdoc.algos.debugging_decision_trees import AutoDebug
+from bugdoc.algos.debugging_decision_trees import DebuggingDecisionTrees
 from bugdoc.utils.quine_mccluskey import findallpaths, from_paths_to_binary
 from bugdoc.utils.utils import load_runs
 from bugdoc.utils import tree
@@ -38,10 +38,10 @@ def execute(experiements_path, max_iter = sys.maxsize, mode = 'all', prev = 0,k=
                 total = len(resultruns)
                 t = tree.build(resultruns, cols=my_cols)
             elif mode == 'first':
-                debug = AutoDebug(first_solution=True, max_iter=max_iter,k=k,use_score=use_score)
+                debug = DebuggingDecisionTrees(first_solution=True, max_iter=max_iter,num_tests=k,use_score=use_score)
                 believedecisive, t, total = debug.run(experiment_name + ".vt", param_space, ['result'])
             else:
-                debug = AutoDebug(first_solution=False, max_iter = max_iter,k=k,use_score=use_score)
+                debug = DebuggingDecisionTrees(first_solution=False, max_iter = max_iter,num_tests=k,use_score=use_score)
                 believedecisive, t, total = debug.run(experiment_name+".vt",param_space,['result'])
 
             if tree.get_depth(t) > 0:
