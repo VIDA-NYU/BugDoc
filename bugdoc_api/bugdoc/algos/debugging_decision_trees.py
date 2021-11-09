@@ -51,11 +51,11 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
 class DebuggingDecisionTrees(Debugger):
-    """ Creates pipeline instances to be run based on a decision tree fitted on execution history and finds root causes of failing.
+    """ Creates pipeline instances to be run based on a decision tree fitted on execution history and finds root causes of failure.
 
     This algorithm fits a decision tree using parameters as features and results of pipelines as target.
     The results are boolean evaluations of success (True) or fail (False). It takes an entry point of
-    a pipeline and a description of the parameter space to generate new instances and return root causes of failing.
+    a pipeline and a description of the parameter space to generate new instances and return root causes of failure.
     """
 
     def determinenodepurity(self, node, path):

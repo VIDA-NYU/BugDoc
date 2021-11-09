@@ -2,7 +2,7 @@
 Worker script
 ===========================
 
-This script responsible for receiving pipeline configurations from BugDoc's algorithms.
+This script is responsible for receiving pipeline configurations from BugDoc's algorithms.
 It runs and evaluates the pipeline instances, and returns the result to BugDoc.
 """
 

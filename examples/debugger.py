@@ -17,7 +17,7 @@ from bugdoc.algos.stacked_shortcut import AutoDebug as StackedShortcut
 # %%
 # Parameter space definition
 # ---------------------------
-# The parameter-values that BugDoc's tries can be retrieved in two ways.
+# The parameter-values that BugDoc tries can be retrieved in two ways:
 # From previous executions of the pipeline or specifying the all possible values each parameter can take.
 # In the following, we provide the entry point of the pipeline and a dictionary with the parameter names as keys
 # and a list of parameter-values as the corresponding value.

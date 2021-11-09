@@ -35,10 +35,10 @@ from builtins import object
 import zmq
 
 class Debugger(object):
-    """ Creates pipeline instances to be run based on execution history and finds root causes of failing.
+    """ Creates pipeline instances to be run based on execution history and finds root causes of failure.
 
     This is the base interface for all debugging algorithms in BugDoc library. It takes an entry point of
-    a pipeline and a description of the parameter space to generate new instances and return root cayses.
+    a pipeline and a description of the parameter space to generate new instances and return root causes.
     """
 
     def __init__(self, max_iter=1000, origin=None, separator="|", send="5557", receive="5558"):
