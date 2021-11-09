@@ -1,9 +1,12 @@
-import numpy as np
-import random
-import sys, os
 import json
-
+import pandas as pd
+import numpy as np
+import os
+import random
 import shutil
+import sys
+
+
 
 
 param_types = [int,float]
@@ -86,3 +89,84 @@ def generate(num_params, num_values,output_folder, min_params=3):
                 experiments_list_file.write("space_%d_%d_%d_%d_%d"%(num_params,len_param_values,i,len(diag),max_clause) + '\n')
     experiments_list_file.close()
 
+
+def generate_bugs(num_attr, len_bug, num_bugs):
+    bugs = []
+
+    for _ in range(num_bugs):
+        bugs.append(list(np.random.choice(range(num_attr), len_bug, replace=False)))
+
+    return bugs
+
+
+def generate_datasets(num_attrs, buggy_cols, buggy_rows):
+    df_pass = pd.DataFrame()
+    df_fail = pd.DataFrame()
+
+    j = 0
+    while j < num_attrs:
+        lst_pass = []
+        lst_fail = []
+        i = 0
+        while i < 100:
+            lst_pass.append(random.randint(0, 5))
+            if j in buggy_cols and i in buggy_rows:
+                lst_fail.append(random.randint(200, 300))
+            else:
+                lst_fail.append(random.randint(0, 5))
+            i += 1
+        df_pass[j] = lst_pass
+        df_fail[j] = lst_fail
+        j += 1
+    return df_pass, df_fail
+
+
+def generate_ogt_experiments(max_attrs, output_folder):
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+    os.makedirs(output_folder)
+
+    experiments_list_path = output_folder + '/list.txt'
+    experiments_list_file = open(experiments_list_path, "a")
+    for num_attrs in range(5, max_attrs):
+
+        for len_bugs in range(1, 2):
+            for len_dis in range(1,2):
+
+                bugs = generate_bugs(num_attrs,len_bugs,len_dis)
+                print(num_attrs,len_bugs,len_dis, bugs)
+                buggy_cols = {x for l in bugs for x in l} # Find columns in bugs
+
+                for affected_rows in [2,4,8,16,32,64]:
+                    buggy_rows = np.random.choice(range(100), affected_rows, replace=False)
+                    df_pass, df_fail = generate_datasets(num_attrs, buggy_cols, buggy_rows)
+                    pipeline_name = os.path.join(output_folder,"synthetic_%d_%d_%d_%d_%d" % (
+                        num_attrs,
+                        affected_rows,
+                        len(buggy_cols),
+                        len(bugs),
+                        max([len(bug) for bug in bugs])
+                    ))
+                    print(pipeline_name)
+                    os.makedirs(pipeline_name)
+
+                    df_pass.to_csv(os.path.join(pipeline_name,"pass.csv"), index=False)
+                    df_fail.to_csv(os.path.join(pipeline_name, "fail.csv"), index=False)
+
+                    config = {
+                        "python_module": "synthetic_pipeline",
+                        "run": "run",
+                        "datasets":
+                            [
+                                "pass.csv",
+                                "fail.csv"
+                            ],
+                        "columns": [str(a) for a in range(num_attrs)],
+                        "encoding": None,
+                        "threshold": "0",
+                        "bugs": [[str(c) for c in bug] for bug in bugs]
+                    }
+                    with open(os.path.join(pipeline_name,"config.json"), 'w') as outfile:
+                        json.dump(config,outfile)
+                    experiments_list_file.write(pipeline_name + '\n')
+    experiments_list_file.close()

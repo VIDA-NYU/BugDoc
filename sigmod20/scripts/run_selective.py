@@ -3,9 +3,7 @@ import json
 from bugdoc.algos.debugging_decision_trees import DebuggingDecisionTrees
 from bugdoc.utils.quine_mccluskey import findallpaths, from_paths_to_binary
 from bugdoc.utils.selective_instrumentation import Pipeline, node_to_instrument, exclusive_to
-from bugdoc.utils.utils import load_runs
 from bugdoc.utils import tree
-from queue import Queue
 import itertools
 
 

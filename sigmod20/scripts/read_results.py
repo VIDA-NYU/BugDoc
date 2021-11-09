@@ -3,6 +3,7 @@ import json
 import ast
 import copy
 import psycopg2
+import sys
 import traceback
 from helpers import *
 from bugdoc.utils.utils import load_combinatorial

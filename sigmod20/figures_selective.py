@@ -25,7 +25,7 @@ fileicareabout.close()
 filtered = alllines#[experiment for experiment in alllines if int(experiment.split('_')[-2]) == 1 and int(experiment.split('_')[-1][:-1]) == 1]
 for experiment in filtered:
     _, p, v, i, _, _ = experiment.split('_')
-    p = int(v) ** int(p)
+    p = int(p)#int(v) ** int(p)
     if p not in permutations:
         permutations.add(p)
         counts["BugDoc"][p] = []
@@ -64,9 +64,12 @@ ax.set_xticklabels(metrics)
 plt.ylim([0.0, 10**3])
 #plt.yscale('log')
 #plt.xscale('log')
-plt.ylabel('# Instances')
+plt.ylabel('Number of Instances')
+plt.xlabel('Number of Parameters')
 plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1),
                fancybox=True, ncol=2)
 fig.tight_layout()
 fig.savefig("selective_ineq_dis_parameters")
 print(permutations)
+for p in permutations:
+    print(p, np.mean(counts["BugDoc SI"][p]) / np.mean(counts["BugDoc"][p]) )

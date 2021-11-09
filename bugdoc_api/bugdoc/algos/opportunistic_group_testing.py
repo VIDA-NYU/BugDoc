@@ -120,19 +120,23 @@ class AutoDebug(object):
         return result
 
     def replace_column(self,column, column_dataframes, bad_dataframe, input_dict):
-        bad_col = bad_dataframe[column]
+        bad_col = copy.deepcopy(bad_dataframe[column].values)
         bad_dataframe[column] = column_dataframes[column]['good_0']
+
         # Test
         result = self.execute_intervention(bad_dataframe, input_dict)
+
         #roll back
         bad_dataframe[column] = bad_col
         return result
 
     def replace_keys(self, column, column_dataframes, bad_dataframe, keys, input_dict):
-        bad_col = bad_dataframe[column]
+        bad_col = copy.deepcopy(bad_dataframe[column].values)
         bad_dataframe[column][keys] = column_dataframes[column]['good_0'][keys]
+
         # Test
         result = self.execute_intervention(bad_dataframe, input_dict)
+
         # roll back
         bad_dataframe[column] = bad_col
         return result
@@ -188,11 +192,11 @@ class AutoDebug(object):
 
         # Socket to send messages on
         self.sender = self.context.socket(zmq.PUSH)
-        self.sender.bind("tcp://*:5567")
+        self.sender.bind("tcp://*:5557")
 
         # Socket with direct access to the sink: used to syncronize start of batch
         self.receiver = self.context.socket(zmq.PULL)
-        self.receiver.bind("tcp://*:5568")
+        self.receiver.bind("tcp://*:5558")
 
         self.poller = zmq.Poller()
         self.poller.register(self.receiver, zmq.POLLIN)
