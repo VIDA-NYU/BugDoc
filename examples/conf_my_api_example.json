@@ -1,5 +1,5 @@
 {
-  "entry_point": "my_pipeline",
+  "entry_point": "dataflow_pipeline.json",
   "python_module": "my_api_example",
   "run": "execute_pipeline",
   "parameters": [

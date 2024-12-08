@@ -37,6 +37,7 @@ from __future__ import print_function
 
 import copy
 import json
+import logging
 import os
 import sys
 import traceback
@@ -44,6 +45,8 @@ import traceback
 from builtins import str
 from builtins import range
 from bugdoc.utils.combinatorial_design import generate_tuples
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 goodbad = [True, False]
 numtests = 30
@@ -77,7 +80,7 @@ def load_runs(filename, input_keys, lims=None):
         try:
             exp = []
             exp_dict = json.loads(e[:-1])
-
+            
             result_value = exp_dict['result']
 
             for key in input_keys:
@@ -199,6 +202,10 @@ def record_pipeline_run(filename,values,parameters,result, origin=None):
 
     if origin:
         paramDict["origin"] = origin
+
+    logging.debug('Filename: ' + filename)
+    logging.debug('New configuration: ' + str(paramDict))
+    
     f = open(filename, "a")
     f.write(json.dumps(paramDict) + '\n')
     f.close()

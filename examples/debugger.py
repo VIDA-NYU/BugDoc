@@ -12,7 +12,7 @@ This script defines the pipeline entry point, the parameter-space,
 # --------------------------------------
 # We choose the Stacked Shortcut Algorithm to debug the pipeline.
 
-from bugdoc.algos.stacked_shortcut import AutoDebug as StackedShortcut
+from bugdoc.algos.stacked_shortcut import StackedShortcut
 
 # %%
 # Parameter space definition
@@ -72,7 +72,7 @@ result = debugger.run(filename, parameter_space)
 
 root, _, _ = result
 parameters = list(parameter_space.keys())
-print('Root Cause: \\n%s' % (
+print('Root Cause: \n%s' % (
     ' OR '.join(
      [
         ' AND '.join(
