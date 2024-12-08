@@ -243,7 +243,7 @@ class DebuggingDecisionTrees(Debugger):
 
     def run(self, entry_point, input_dict, outputs=['results'], rebuild=True):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point + ".adb",
+        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point,
                                                                            self.my_inputs)
         logging.debug("pv_goodness is: " + str(self.pv_goodness))
         logging.debug("allresults is: " + str(self.allresults))

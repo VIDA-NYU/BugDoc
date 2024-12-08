@@ -69,6 +69,6 @@ def main():
             result = False
             logging.error("-" * 60)
 
-        record_pipeline_run(entry_point + ".adb", values, parameters, result)
+        record_pipeline_run(entry_point, values, parameters, result)
         values.append(result)
         sender.send_string(str(values))

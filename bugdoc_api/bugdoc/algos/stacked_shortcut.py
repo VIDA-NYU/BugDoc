@@ -89,7 +89,7 @@ class StackedShortcut(Debugger):
 
     def run(self, entry_point, input_dict, outputs=['results']):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, _ = load_runs(self.entry_point + ".adb", self.my_inputs)
+        self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
         logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
