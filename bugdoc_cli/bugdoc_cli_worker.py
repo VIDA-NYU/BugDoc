@@ -3,7 +3,6 @@ import ast
 import logging
 import importlib
 import json
-import os
 import sys, traceback
 import zmq
 from bugdoc.utils.utils import record_pipeline_run
