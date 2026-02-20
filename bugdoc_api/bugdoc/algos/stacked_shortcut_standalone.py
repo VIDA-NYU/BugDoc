@@ -36,6 +36,8 @@ import copy
 import logging
 import ast
 import time
+
+import zmq
 from bugdoc.algos.base import Debugger
 from bugdoc.utils.utils import load_runs, load_combinatorial
 
@@ -136,4 +138,64 @@ class StackedShortcutStandalone(Debugger):
 
         # Proceed with debugging logic...
         # (This is simplified; full implementation would continue with the algorithm logic)
-        return self.allresults
+        self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
+        self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
+        goodlist, badlist = self.determinepurity(self.expers, self.rets)
+        logging.debug("goodlist: " + str(goodlist))
+        lists = self.get_good_and_bad_instances(goodlist, badlist)
+        logging.debug("lists: " + str(lists))
+        if len(lists) > 0:
+            cgs, cf = lists
+            logging.debug("Retrieving cf and cgs: " + str(cf) + " , " + str(cgs))
+            cf_orig = copy.deepcopy(cf)
+            for cg in cgs:
+                for p in range(len(cf)):
+                    cf_aux = copy.deepcopy(cf)
+                    cf_aux[p] = cg[p]
+                    result = False
+                    if cf_aux not in self.expers:
+
+                        self._workflow(cf_aux)
+                        requests.add(str(cf_aux))
+
+                        while len(requests) > 0:
+                            socks = dict(self.poller.poll(10000))
+                            if socks:
+                                exp = self.get_result_from_poll(socks)
+                                if exp:
+                                    self.allexperiments.append(exp)
+                                    requests.discard(str(exp[:-1]))
+                                    x = copy.deepcopy(exp)
+                                    x[-1] = x[-1]
+                                    result = x[-1]
+                                    # We could run the experiment
+                                    if result is not None:
+                                        self.allresults.append(x)
+                            else:
+                                for tup in requests:
+                                    exp = list(tup)
+                    else:
+                        index = self.expers.index(cf_aux)
+                        result = self.rets[index]
+                    # We could not run the experiment
+                    if result is None:
+                        break
+                    if not result:
+                        badlist.append(cf_aux)
+                        cf = copy.deepcopy(cf_aux)
+                    else:
+                        goodlist.append(cf_aux)
+
+                believeddecisive = []
+                for i in range(len(cf)):
+                    if cf_orig[i] == cf[i]:
+                        believeddecisive.append((i, cf_orig[i]))
+
+                for good_instance in goodlist:
+                    if all([good_instance[pair[0]] == pair[1] for pair in believeddecisive]):
+                        believeddecisive = []
+                        break
+                if len(believeddecisive) > 0 and believeddecisive not in self.believeddecisive:
+                    self.believeddecisive.append(believeddecisive)
+                 
+        return self.believeddecisive
