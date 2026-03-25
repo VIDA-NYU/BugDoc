@@ -199,3 +199,13 @@ class StackedShortcutStandalone(Debugger):
                     self.believeddecisive.append(believeddecisive)
                  
         return self.believeddecisive
+    
+    def __init__(self, created_instances=False, k=4, max_iter=1000, origin=None, separator="|", function=None):
+        super(StackedShortcutStandalone, self).__init__(max_iter=max_iter,
+                                       origin=origin,
+                                       separator=separator,
+                                        function=function
+                                       )
+        self.created_instances = created_instances
+        self.k = k
+
