@@ -37,7 +37,6 @@ import copy
 import queue
 import logging
 import time
-import zmq
 from builtins import zip
 from builtins import str
 from builtins import range
@@ -194,11 +193,10 @@ class DebuggingDecisionTrees(Debugger):
                 requests.add(str(e))
 
         while len(requests) > 0:
-            socks = dict(self.poller.poll(1000))
+            socks = self.poll_results(10000)
             if socks:
-                if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv_string(zmq.NOBLOCK)
-                    exp = ast.literal_eval(msg)
+                exp = self.get_result_from_poll(socks)
+                if exp:
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
                     for i in range(len(self.my_inputs)):
@@ -265,11 +263,10 @@ class DebuggingDecisionTrees(Debugger):
                     requests.add(str(exp))
 
         while len(requests) > 0:
-            socks = dict(self.poller.poll(10000))
+            socks = self.poll_results(10000)
             if socks:
-                if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv_string(zmq.NOBLOCK)
-                    exp = ast.literal_eval(msg)
+                exp = self.get_result_from_poll(socks)
+                if exp:
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
                     for i in range(len(self.my_inputs)):
@@ -339,7 +336,7 @@ class DebuggingDecisionTrees(Debugger):
 
 
     def __init__(self, return_num_instances=False, first_solution=False, num_tests=10000, use_score=False,
-                 max_iter=10000, origin=None, separator="|", send="5557", receive="5558"):
+                 max_iter=10000, origin=None, separator="|", send="5557", receive="5558",function=None):
         """ Build a new debugging debugging decision trees algorithm object.
 
         Parameters
@@ -357,7 +354,8 @@ class DebuggingDecisionTrees(Debugger):
                                                      origin=origin,
                                                      separator=separator,
                                                      send=send,
-                                                     receive=receive
+                                                     receive=receive,
+                                                     function=function
                                                      )
         self.created_instances = return_num_instances
         self.puregoodlist = []
