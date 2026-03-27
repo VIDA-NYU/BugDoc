@@ -225,3 +225,11 @@ class Debugger(object):
                 msg = self.receiver.recv_string(zmq.NOBLOCK)
                 return ast.literal_eval(msg)
             return None
+    
+    def close(self):
+        """ Clean up resources. """
+        if not self.is_standalone:
+            self.poller.unregister(self.receiver)
+            self.sender.close()
+            self.receiver.close()
+            self.context.term()

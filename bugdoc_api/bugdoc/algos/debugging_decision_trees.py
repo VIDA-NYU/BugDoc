@@ -325,10 +325,7 @@ class DebuggingDecisionTrees(Debugger):
         # tree.draw_tree(t)
         logging.debug("length of all experiments is: " + str(len(self.allexperiments)))
         # logging.debug("The current goodness count is: " + str(self.pv_goodness))
-        self.poller.unregister(self.receiver)
-        self.receiver.close()
-        self.sender.close()
-        self.context.term()
+        self.close()
         if self.created_instances:
             return (len(self.allexperiments) - initial_experiments_num)
         return self.believeddecisive, t, len(self.allexperiments)
@@ -357,6 +354,9 @@ class DebuggingDecisionTrees(Debugger):
                                                      receive=receive,
                                                      function=function
                                                      )
+        print("Initialized DebuggingDecisionTrees with max_iter={}, origin={}, separator={}, send={}, receive={}, function={}, return_num_instances={}, first_solution={}, num_tests={}, use_score={}".format(
+            max_iter, origin, separator, send, receive, function, return_num_instances, first_solution, num_tests, use_score
+        ))
         self.created_instances = return_num_instances
         self.puregoodlist = []
         self.purebadlist = []
