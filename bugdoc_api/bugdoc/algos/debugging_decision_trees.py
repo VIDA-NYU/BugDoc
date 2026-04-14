@@ -78,15 +78,16 @@ class DebuggingDecisionTrees(Debugger):
         purebadpath = None
         while (not q.empty()) and ((puregoodpath is None) or (purebadpath is None)):
             current = q.get()
-            if current[0].results is None:
-                q.put((current[0].fb, current[1] + [(current[0].col, current[0].value, False)]))
-                q.put((current[0].tb, current[1] + [(current[0].col, current[0].value, True)]))
-            elif (len(list(current[0].results.items())) > 1):
-                continue
-            elif (list(current[0].results.items())[0][0]) and (puregoodpath is None):
-                puregoodpath = current[1]
-            elif (not list(current[0].results.items())[0][0]) and (purebadpath is None):
-                purebadpath = current[1]
+            if current[0]:
+                if current[0].results is None:
+                    q.put((current[0].fb, current[1] + [(current[0].col, current[0].value, False)]))
+                    q.put((current[0].tb, current[1] + [(current[0].col, current[0].value, True)]))
+                elif (len(list(current[0].results.items())) > 1):
+                    continue
+                elif (list(current[0].results.items())[0][0]) and (puregoodpath is None):
+                    puregoodpath = current[1]
+                elif (not list(current[0].results.items())[0][0]) and (purebadpath is None):
+                    purebadpath = current[1]
         return [puregoodpath, purebadpath]
 
     def findallpaths(self, node):
@@ -97,17 +98,18 @@ class DebuggingDecisionTrees(Debugger):
 
         while (not q.empty()):
             current = q.get()
-            if current[0].results is None:
-                key = current[0].col
-                value = current[0].value
-                q.put((current[0].fb, current[1] + [(key, value, False)]))
-                q.put((current[0].tb, current[1] + [(key, value, True)]))
-            elif (len(list(current[0].results.items())) > 1):
-                continue
-            elif (list(current[0].results.items())[0][0]):
-                puregoodpaths.append(current[1])
-            elif (not list(current[0].results.items())[0][0]):
-                purebadpaths.append(current[1])
+            if current[0]:
+                if current[0].results is None:
+                    key = current[0].col
+                    value = current[0].value
+                    q.put((current[0].fb, current[1] + [(key, value, False)]))
+                    q.put((current[0].tb, current[1] + [(key, value, True)]))
+                elif (len(list(current[0].results.items())) > 1):
+                    continue
+                elif (list(current[0].results.items())[0][0]):
+                    puregoodpaths.append(current[1])
+                elif (not list(current[0].results.items())[0][0]):
+                    purebadpaths.append(current[1])
         return [puregoodpaths, purebadpaths]
 
     def manufacturetests(self, moralflag, alist):
@@ -239,28 +241,55 @@ class DebuggingDecisionTrees(Debugger):
 
         return False
 
-    def run(self, entry_point, input_dict, outputs=['results'], rebuild=True):
+    def run(self, entry_point, input_dict, outputs=['results'], rebuild=True, historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point,
-                                                                           self.my_inputs)
+        if historical_runs is None:
+            self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point,
+                                                                               self.my_inputs)
+        else:
+            if isinstance(historical_runs, (list, tuple)):
+                if len(historical_runs) >= 3:
+                    self.allexperiments, self.allresults, self.pv_goodness = historical_runs[:3]
+                elif len(historical_runs) == 2:
+                    self.allexperiments, self.allresults = historical_runs
+                    self.pv_goodness = {}
+                    for exp in self.allresults:
+                        result_value = exp[-1]
+                        for i in range(len(self.my_inputs)):
+                            key = self.my_inputs[i]
+                            v = exp[i]
+                            if key not in self.pv_goodness:
+                                self.pv_goodness[key] = {}
+                            if v not in self.pv_goodness[key]:
+                                self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
+                            if result_value:
+                                self.pv_goodness[key][v]['good'] += 1
+                            else:
+                                self.pv_goodness[key][v]['bad'] += 1
+                else:
+                    raise ValueError("historical_runs must be a list/tuple of [allexperiments, allresults] or [allexperiments, allresults, pv_goodness]")
+            else:
+                raise ValueError("historical_runs must be a list/tuple of [allexperiments, allresults] or [allexperiments, allresults, pv_goodness]")
+
         logging.debug("pv_goodness is: " + str(self.pv_goodness))
         logging.debug("allresults is: " + str(self.allresults))
         requests = set()
         self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
-        permutations = load_combinatorial(input_dict)
-        for d in permutations:
-            exp = []
-            for param in self.my_inputs:
-                value = d[param]
-                exp.append(value)
-            if ([p for p in exp] not in self.expers):
-                if (len(self.allexperiments) + len(requests)) < self.max_iter:
-                    self._workflow(exp)
-                    if self.is_poller_not_sync:
-                        time.sleep(1)
-                        self.is_poller_not_sync = False
-                    requests.add(str(exp))
+        if historical_runs is None or not (self.allexperiments and self.allresults):
+            permutations = load_combinatorial(input_dict)
+            for d in permutations:
+                exp = []
+                for param in self.my_inputs:
+                    value = d[param]
+                    exp.append(value)
+                if ([p for p in exp] not in self.expers):
+                    if (len(self.allexperiments) + len(requests)) < self.max_iter:
+                        self._workflow(exp)
+                        if self.is_poller_not_sync:
+                            time.sleep(1)
+                            self.is_poller_not_sync = False
+                        requests.add(str(exp))
 
         while len(requests) > 0:
             socks = self.poll_results(10000)

@@ -87,24 +87,32 @@ class StackedShortcut(Debugger):
             return [cgs, cf]
         return []
 
-    def run(self, entry_point, input_dict, outputs=['results']):
+    def run(self, entry_point, input_dict, outputs=['results'], historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
+        if historical_runs is None:
+            self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
+        else:
+            if isinstance(historical_runs, (list, tuple)) and len(historical_runs) >= 2:
+                self.allexperiments = historical_runs[0]
+                self.allresults = historical_runs[1]
+            else:
+                raise ValueError("historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result")
         logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
-        permutations = load_combinatorial(input_dict)
-        for d in permutations:
-            exp = []
-            for param in self.my_inputs:
-                value = d[param]
-                exp.append(value)
-            if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
-                self._workflow(exp)
-                if self.is_poller_not_sync:
-                    time.sleep(1)
-                    self.is_poller_not_sync = False
-                requests.add(str(exp))
+        if historical_runs is None or not (self.allexperiments and self.allresults):
+            permutations = load_combinatorial(input_dict)
+            for d in permutations:
+                exp = []
+                for param in self.my_inputs:
+                    value = d[param]
+                    exp.append(value)
+                if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+                    self._workflow(exp)
+                    if self.is_poller_not_sync:
+                        time.sleep(1)
+                        self.is_poller_not_sync = False
+                    requests.add(str(exp))
 
         while len(requests) > 0:
             socks = dict(self.poller.poll(10000))

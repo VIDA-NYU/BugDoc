@@ -45,6 +45,8 @@ import traceback
 from builtins import str
 from builtins import range
 from bugdoc.utils.combinatorial_design import generate_tuples
+import copy
+import math
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -149,8 +151,43 @@ def load_dataxray(filename, input_keys, lims=None):
     return feature_vector.replace('rate', str(0 if count == 0 else count_error / float(count))).replace('cost', '99.99')
 
 
-def load_combinatorial(input_dict):
-    return generate_tuples(input_dict)
+def _sample_values(values, max_size):
+    if len(values) <= max_size:
+        return list(values)
+    if max_size <= 1:
+        return [values[0]]
+    step = float(len(values) - 1) / float(max_size - 1)
+    return [values[int(round(i * step))] for i in range(max_size)]
+
+
+def load_combinatorial(input_dict, max_pair_product=10000):
+    """Load a combinatorial design with a scalable fallback.
+
+    If the two largest domains are too large, reduce them to a smaller
+    representative subset before calling generate_tuples().
+    """
+    if not input_dict:
+        return []
+
+    sizes = [(key, len(values)) for key, values in input_dict.items()]
+    if any(size == 0 for _, size in sizes):
+        return []
+    if len(sizes) < 2:
+        return []
+
+    sizes.sort(key=lambda item: item[1], reverse=True)
+    largest_key, largest_size = sizes[0]
+    second_key, second_size = sizes[1]
+
+    if largest_size * second_size <= max_pair_product:
+        return generate_tuples(copy.deepcopy(input_dict))
+
+    max_side = int(math.ceil(math.sqrt(max_pair_product)))
+    reduced_input = copy.deepcopy(input_dict)
+    reduced_input[largest_key] = _sample_values(reduced_input[largest_key], max_side)
+    reduced_input[second_key] = _sample_values(reduced_input[second_key], max_side)
+
+    return generate_tuples(reduced_input)
 
 
 def _iterate_over_keys(permutations, current_permutation, input_dict):

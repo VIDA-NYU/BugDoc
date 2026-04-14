@@ -157,6 +157,25 @@ class TestStackedShortcutStandalone(unittest.TestCase):
             # Some errors might be expected if load_runs fails, but the core logic should work
             print(f"Expected potential error during test: {e}")
 
+    def test_run_with_historical_runs_skips_initial_generation(self):
+        """Test that historical_runs bypasses load_runs and skips the initial permutation stage."""
+        history = (
+            [[0.6, 0.7, True]],
+            [[0.6, 0.7, True]]
+        )
+        algo = StackedShortcutStandalone(function=self.mock_pipeline, max_iter=10)
+        parameter_space = {
+            'param1': [0.6],
+            'param2': [0.7]
+        }
+
+        result = algo.run('entry_point', parameter_space, outputs=['result'], historical_runs=history)
+
+        self.assertEqual(algo.allexperiments, history[0])
+        self.assertEqual(algo.allresults, history[1])
+        self.assertEqual(self.call_count, 0)
+        self.assertEqual(result, [])
+
 
 class StandaloneIntegrationTest(unittest.TestCase):
     """Integration tests for standalone mode."""
