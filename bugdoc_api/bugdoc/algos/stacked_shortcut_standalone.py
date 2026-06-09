@@ -167,7 +167,7 @@ class StackedShortcutStandalone(Debugger):
                         requests.add(str(cf_aux))
 
                         while len(requests) > 0:
-                            socks = dict(self.poller.poll(10000))
+                            socks = self.poll_results(10000)
                             if socks:
                                 exp = self.get_result_from_poll(socks)
                                 if exp:

@@ -467,6 +467,8 @@ def from_paths_to_binary(paths, input_dict):
             for value in input_dict[param]:
                 if (param, value) not in flatten:
                     flatten.append((param, value))
+                    if len(flatten) > 10:
+                        return [miniterms, flatten]
                 if (param, value) in bits_dict:
                     path_possibilities.append([str(int(bits_dict[(param, value)]))])
                 else:
@@ -485,7 +487,7 @@ def prune_tree(t, keys):
 
     _, badpaths, input_dict = findallpaths(t)
     miniterms, flatten = from_paths_to_binary(badpaths, input_dict)
-
+    
     # Quine-McClusky does not scale if the the number of different feature-values increases.
     if 0 < len(flatten) <= 10:
         s = reduce_terms(len(flatten), miniterms)
