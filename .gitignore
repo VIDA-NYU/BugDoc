@@ -101,11 +101,36 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
+# Type checking
+.ruff_cache/
+
+# Pre-commit
+.pre-commit
+
+# Documentation build
+docs/_build/
+site/
+
+# IDEs and editors
 **/diagnostics
 **/__pycache__
 **/venv
 **/.conn
 **/.idea
-
 .vscode
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE settings
+.project
+.pydevproject
+.settings/
+
+# Backup files
+*.bak
+*.backup
