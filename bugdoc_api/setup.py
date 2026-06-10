@@ -11,7 +11,7 @@ install_requires = [
     'pyzmq',
     'certifi>=2023.0',
     'Pillow>=9.0',
-    'Django>=4.2.17',
+    'Django>=4.2.30',
 ]
 
 setup(
