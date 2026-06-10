@@ -19,7 +19,7 @@ setup(
     version='0.2.0',
     packages=packages,
     install_requires=install_requires,
-    python_requires='>=3.8',
+    python_requires='>=3.8.1',
     description="BugDoc library",
     author="Raoni Lourenco",
     author_email='raoni@nyu.edu',
