@@ -8,6 +8,7 @@ packages = find_packages()
 
 install_requires = [
     "future",
+    "six",
     "numpy",
     "pyzmq",
     "certifi>=2023.0",
