@@ -65,7 +65,7 @@ jobs:
 
     - name: Run tests with pytest and coverage
       run: |
-        pytest test/ \
+        uv run pytest test/ \
           -v \
           --cov=bugdoc \
           --cov=bugdoc_cli \
