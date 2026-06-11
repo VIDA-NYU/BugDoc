@@ -32,17 +32,15 @@
 ##
 ###############################################################################
 
-#Following blog post at: http://kldavenport.com/pure-python-decision-trees/
+# Following blog post at: http://kldavenport.com/pure-python-decision-trees/
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
-from builtins import str
-from builtins import range
-from builtins import object
 import collections
-from PIL import Image, ImageDraw
+from builtins import object, range, str
 from math import log
+
+from PIL import Image, ImageDraw
 
 
 def unique_counts(rows):
@@ -54,7 +52,8 @@ def unique_counts(rows):
     for row in rows:
         # The result is the last column
         r = row[len(row) - 1]
-        if r not in results: results[r] = 0
+        if r not in results:
+            results[r] = 0
         results[r] += 1
     return results
 
@@ -73,12 +72,16 @@ def unique_counts_dd(rows):
 
 # Entropy is the sum of p(x)log(p(x)) across all the different possible results
 
+
 def entropy(rows):
     """
     :param rows:
     :return:
     """
-    log2 = lambda x: log(x) // log(2)
+
+    def log2(x):
+        return log(x) // log(2)
+
     results = unique_counts(rows)
 
     # Now calculate the entropy
@@ -91,22 +94,34 @@ def entropy(rows):
 
 
 class DecisionNode(object):
-    """
-    """
-    def __init__(self, col=-1, cols=[], value=None, best_gain=None, results=None, tb=None, fb=None, parent=None):
+    """ """
+
+    def __init__(
+        self,
+        col=-1,
+        cols=[],
+        value=None,
+        best_gain=None,
+        results=None,
+        tb=None,
+        fb=None,
+        parent=None,
+    ):
         self.col = col  # column index of criteria being tested
         self.best_gain = best_gain
-        self.col_str = cols[col] if len(cols) > 0 else '<col>'  # column factor str
+        self.col_str = cols[col] if len(cols) > 0 else "<col>"  # column factor str
         self.value = value  # value necessary to get a true result
-        self.results = results  # dict_ of results for a branch, None for everything except endpoints
+        self.results = (
+            results  # dict_ of results for a branch, None for everything except endpoints
+        )
         self.tb = tb  # true decision nodes
         self.fb = fb  # false decision nodes
         self.parent = parent
 
 
 class Stats(object):
-    """
-    """
+    """ """
+
     leaf_nodes = 0
     pure_nodes = 0
 
@@ -128,11 +143,6 @@ class Stats(object):
         return self.count_leaf(tree.fb) + self.count_leaf(tree.tb)
 
 
-def __init__(self, t_set, cols):
-    self.t_set = t_set
-    self.cols = cols
-
-
 # Divides a set on a specific column. Can handle numeric or nominal values
 def divide_set(rows, column, value):
     """
@@ -141,15 +151,16 @@ def divide_set(rows, column, value):
     :param value:
     :return:
     """
-    # for numerical values
-    if isinstance(value, int) or isinstance(value, float):
-        split_function = lambda row: row[column] >= value
 
-    # for nominal values
-    else:
-        split_function = lambda row: row[column] == value
+    def split_function(row):
+        # for numerical values
+        if isinstance(value, int) or isinstance(value, float):
+            return row[column] >= value
+        else:
+            return row[column] == value
 
         # Divide the rows into two sets and return them
+
     set1 = [row for row in rows if split_function(row)]  # if split_function(row)
     set2 = [row for row in rows if not split_function(row)]
     return set1, set2
@@ -204,14 +215,21 @@ def build(rows, score_fun=entropy, cols=None, parent=None):
     if best_gain > 0:
         true_branch = build(best_sets[0], cols=cols)
         false_branch = build(best_sets[1], cols=cols)
-        return DecisionNode(col=best_criteria[0], value=best_criteria[1], cols=cols,
-                            best_gain=best_gain, tb=true_branch, fb=false_branch)
+        return DecisionNode(
+            col=best_criteria[0],
+            value=best_criteria[1],
+            cols=cols,
+            best_gain=best_gain,
+            tb=true_branch,
+            fb=false_branch,
+        )
     return DecisionNode(results=unique_counts(rows))
 
 
 # We now have a function that returns a trained decision tree. We can print a rudimentary tree.
 
-def print_tree(tree, indent=''):
+
+def print_tree(tree, indent=""):
     """
     :param tree:
     :param indent:
@@ -222,13 +240,13 @@ def print_tree(tree, indent=''):
         print(str(tree.results))
     else:
         # Print the criteria
-        print('Column ' + str(tree.col_str) + ' : ' + str(tree.value) + '? ')
+        print("Column " + str(tree.col_str) + " : " + str(tree.value) + "? ")
 
         # Print the branches
-        print(indent + 'True->', end=' ')
-        print_tree(tree.tb, indent + '  ')
-        print(indent + 'False->', end=' ')
-        print_tree(tree.fb, indent + '  ')
+        print(indent + "True->", end=" ")
+        print_tree(tree.tb, indent + "  ")
+        print(indent + "False->", end=" ")
+        print_tree(tree.fb, indent + "  ")
 
 
 # printing stuff
@@ -252,7 +270,7 @@ def get_depth(tree):
     return max(get_depth(tree.tb), get_depth(tree.fb)) + 1
 
 
-def draw_tree(tree, jpeg='tree.jpg'):
+def draw_tree(tree, jpeg="tree.jpg"):
     """
     :param tree:
     :param jpeg:
@@ -261,11 +279,11 @@ def draw_tree(tree, jpeg='tree.jpg'):
     w = get_width(tree) * 100
     h = get_depth(tree) * 100 + 120
 
-    img = Image.new('RGB', (w, h), (255, 255, 255))
+    img = Image.new("RGB", (w, h), (255, 255, 255))
     draw = ImageDraw.Draw(img)
 
     draw_node(draw, tree, w // 2, 20)
-    img.save(jpeg, 'JPEG')
+    img.save(jpeg, "JPEG")
     # img.show()
     # IPython.display.display(IPython.display.Image(filename=jpeg))
 
@@ -288,9 +306,11 @@ def draw_node(draw, tree, x, y):
         right = x + (w1 + w2) // 2
 
         # Draw the condition string
-        draw.text((x - 20, y - 10),
-                  str(tree.col_str) + ':' + str(tree.value) + ' (' + str(round(tree.best_gain, 2)) + ')',
-                  (0, 0, 0))
+        draw.text(
+            (x - 20, y - 10),
+            str(tree.col_str) + ":" + str(tree.value) + " (" + str(round(tree.best_gain, 2)) + ")",
+            (0, 0, 0),
+        )
 
         # Draw links to the branches
         draw.line((x, y, left + w1 // 2, y + 100), fill=(255, 0, 0))
@@ -300,9 +320,5 @@ def draw_node(draw, tree, x, y):
         draw_node(draw, tree.fb, left + w1 // 2, y + 100)
         draw_node(draw, tree.tb, right - w2 // 2, y + 100)
     else:
-        txt = ' \n'.join(['%s:%d' % v for v in list(tree.results.items())])
+        txt = " \n".join(["%s:%d" % v for v in list(tree.results.items())])
         draw.text((x - 20, y), txt, (0, 0, 0))
-
-
-
-

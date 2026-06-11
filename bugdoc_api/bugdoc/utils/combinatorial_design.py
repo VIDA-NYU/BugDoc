@@ -44,7 +44,8 @@ def create_rows(n, m, keys):
 
 
 def fit(v0, v1, pair, rows, keys):
-    if any((d[pair[0]] == v0 and d[pair[1]] == v1) for d in rows): return
+    if any((d[pair[0]] == v0 and d[pair[1]] == v1) for d in rows):
+        return
     for d in rows:
         if d[pair[0]] == v0 and d[pair[1]] is None:
             d[pair[1]] = v1
@@ -68,7 +69,7 @@ def all_disjoint_pairs(lst):
     a = lst[0]
     for i in range(1, len(lst)):
         pair = (a, lst[i])
-        for rest in all_disjoint_pairs(lst[1:i] + lst[i + 1:]):
+        for rest in all_disjoint_pairs(lst[1:i] + lst[i + 1 :]):
             yield [pair] + rest
 
 
@@ -80,8 +81,8 @@ def get_disjoint_pairs_with_max(keys, max0, max1):
 
 
 def generate_tuples(parameters):
-    if (len(parameters.keys()) % 2 != 0):
-        parameters['dummy'] = []
+    if len(parameters.keys()) % 2 != 0:
+        parameters["dummy"] = []
     keys = list(parameters.keys())
     max0 = keys[0]
     max1 = keys[1]
@@ -109,9 +110,9 @@ def generate_tuples(parameters):
                 for v1 in parameters[pair[1]]:
                     fit(v0, v1, pair, rows, keys)
             handled_pairs.append(pair)
-    parameters.pop('dummy', None)
+    parameters.pop("dummy", None)
     for row in rows:
-        row.pop('dummy', None)
+        row.pop("dummy", None)
         for key in parameters.keys():
             if row[key] is None:
                 row[key] = random.choice(list(parameters[key]))

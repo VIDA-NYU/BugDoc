@@ -32,19 +32,26 @@
 ##
 ###############################################################################
 
+import ast
 import copy
 import logging
-import zmq
-import ast
 import time
-from bugdoc.utils.utils import load_runs, goodbad, numtests, load_combinatorial, compute_score,\
-                                load_permutations
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+import zmq
+
+from bugdoc.utils.utils import (
+    compute_score,
+    goodbad,
+    load_combinatorial,
+    load_permutations,
+    load_runs,
+    numtests,
+)
+
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
 
 class AutoDebug(object):
-
     # Given a matrix myarr and a target vector mytarg,
     # determine for each column of the matrix the puregood values
     # the purebad values and the mixed ones
@@ -72,15 +79,17 @@ class AutoDebug(object):
     # believeddecisive [variableindex, moralflag, value]
     def manufacturetests(self, i, moralflag, alllists):
         puregoodlist, purebadlist, _ = alllists
-        if (moralflag == 'bad') and (len(purebadlist[i]) > 0):
+        if (moralflag == "bad") and (len(purebadlist[i]) > 0):
             for j in range(len(purebadlist[i])):
-                self.assembletests(i, 'bad', purebadlist[i][j], alllists)
-                if self.first_solution and len(self.believeddecisive) > 0: break
+                self.assembletests(i, "bad", purebadlist[i][j], alllists)
+                if self.first_solution and len(self.believeddecisive) > 0:
+                    break
             return i
-        if (moralflag == 'good') and (len(puregoodlist[i]) > 0):
+        if (moralflag == "good") and (len(puregoodlist[i]) > 0):
             for j in range(len(puregoodlist[i])):
-                self.assembletests(i, 'good', puregoodlist[i][j], alllists)
-                if self.first_solution and len(self.believeddecisive) > 0: break
+                self.assembletests(i, "good", puregoodlist[i][j], alllists)
+                if self.first_solution and len(self.believeddecisive) > 0:
+                    break
             return i
         return None
 
@@ -91,7 +100,7 @@ class AutoDebug(object):
     def assembletests(self, testindex, moralflag, val, alllists):
         (puregoodlist, purebadlist, mixedlist) = alllists
         outlist = []
-        if moralflag == 'good':
+        if moralflag == "good":
             for j in range(len(purebadlist)):
                 if j == testindex:
                     outlist.append([val])
@@ -104,7 +113,7 @@ class AutoDebug(object):
                     for z in puregoodlist[j]:
                         y.append(z)
                     outlist.append(y)
-        if moralflag == 'bad':
+        if moralflag == "bad":
             input_dict = {}
             for j in range(len(puregoodlist)):
                 if j == testindex:
@@ -131,14 +140,15 @@ class AutoDebug(object):
             for param in self.my_inputs:
                 value = d[param]
                 x.append(value)
-            if (x not in self.expers):
+            if x not in self.expers:
                 self.expers.append(x)
                 experiments.append(x)
                 costs.append(compute_score(x, self.my_inputs, self.pv_goodness, moralflag))
         # Executing experiments in ascending order of costs
         allrets = []
         indices = [t[0] for t in sorted(enumerate(costs), key=lambda x: x[1])]
-        if len(indices) > self.k: indices = indices[:self.k]
+        if len(indices) > self.k:
+            indices = indices[: self.k]
         if self.workflow:
             requests = set()
             for i in indices:
@@ -173,10 +183,10 @@ class AutoDebug(object):
                             time.sleep(1)
                             self.is_poller_not_sync = False
         if len(set(allrets)) == 1:
-            if (moralflag == 'bad') and (allrets[0] == goodbad[1]):
-                self.believeddecisive.append([testindex, 'bad', val])
-            if (moralflag == 'good') and (allrets[0] == goodbad[0]):
-                self.believeddecisive.append([testindex, 'good', val])
+            if (moralflag == "bad") and (allrets[0] == goodbad[1]):
+                self.believeddecisive.append([testindex, "bad", val])
+            if (moralflag == "good") and (allrets[0] == goodbad[0]):
+                self.believeddecisive.append([testindex, "good", val])
         if len(set(allrets)) == 0:
             self.believeddecisive.append([testindex, moralflag, val])
         return True
@@ -186,8 +196,9 @@ class AutoDebug(object):
         self.my_inputs = input_dict.keys()
         self.my_outputs = outputs
         self.filename = filename
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.filename.replace(".vt", ".adb"),
-                                                                           self.my_inputs)
+        self.allexperiments, self.allresults, self.pv_goodness = load_runs(
+            self.filename.replace(".vt", ".adb"), self.my_inputs
+        )
         logging.debug("allresults is: " + str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
@@ -220,11 +231,11 @@ class AutoDebug(object):
                         if key not in self.pv_goodness:
                             self.pv_goodness[key] = {}
                         if v not in self.pv_goodness[key]:
-                            self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
+                            self.pv_goodness[key][v] = {"good": 0, "bad": 0}
                         if eval(result_value):
-                            self.pv_goodness[key][v]['good'] += 1
+                            self.pv_goodness[key][v]["good"] += 1
                         else:
-                            self.pv_goodness[key][v]['bad'] += 1
+                            self.pv_goodness[key][v]["bad"] += 1
 
                     requests.discard(tuple(exp[:-1]))
                     x = copy.deepcopy(exp)
@@ -256,14 +267,15 @@ class AutoDebug(object):
         while manufacture:
             manufacture = False
             for i in indices:
-
-                x = self.manufacturetests(i, 'bad', self.myalllists)
+                x = self.manufacturetests(i, "bad", self.myalllists)
                 logging.debug("after manufacturetests for bad up to index: " + str(x))
                 logging.debug("believeddecisive is: " + str(self.believeddecisive))
                 logging.debug("length of all experiments is: " + str(len(self.allexperiments)))
 
                 if (self.first_solution and len(self.believeddecisive) > 0) or len(
-                    self.allexperiments) >= self.max_iter: break
+                    self.allexperiments
+                ) >= self.max_iter:
+                    break
 
                 if not (i == indices[-1]):
                     self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
@@ -272,7 +284,9 @@ class AutoDebug(object):
 
                     # ordering the indices
                     translist = zip(*self.myalllists)
-                    pairs = [(len(tup[0]) + len(tup[1]) + len(tup[2]), len(tup[2])) for tup in translist]
+                    pairs = [
+                        (len(tup[0]) + len(tup[1]) + len(tup[2]), len(tup[2])) for tup in translist
+                    ]
                     tuples = sorted(enumerate(pairs), key=lambda x: x[1])
                     newindices = [t[0] for t in tuples]
 
@@ -298,8 +312,16 @@ class AutoDebug(object):
             message += self.separator + str(self.origin) + "_minimal_" + str(self.cohort)
         self.sender.send_string(message)
 
-    def __init__(self, first_solution=False, max_iter=1000, return_max_instances=False, k=numtests, use_score=False,
-                 origin=None, separator="|"):
+    def __init__(
+        self,
+        first_solution=False,
+        max_iter=1000,
+        return_max_instances=False,
+        k=numtests,
+        use_score=False,
+        origin=None,
+        separator="|",
+    ):
         self.filename = None
         self.allexperiments = []
         self.allresults = []

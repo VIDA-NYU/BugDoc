@@ -32,19 +32,20 @@
 ##
 ###############################################################################
 
+import ast
 import copy
 import logging
-import zmq
-import ast
 import time
-from bugdoc.algos.base import Debugger
-from bugdoc.utils.utils import load_runs, load_combinatorial
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+import zmq
+
+from bugdoc.algos.base import Debugger
+from bugdoc.utils.utils import load_combinatorial, load_runs
+
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
 
 class StackedShortcut(Debugger):
-
     def determinepurity(self, myarr, mytarg):
         goodlist = []
         badlist = []
@@ -87,7 +88,7 @@ class StackedShortcut(Debugger):
             return [cgs, cf]
         return []
 
-    def run(self, entry_point, input_dict, outputs=['results'], historical_runs=None):
+    def run(self, entry_point, input_dict, outputs=["results"], historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
         if historical_runs is None:
             self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
@@ -96,8 +97,10 @@ class StackedShortcut(Debugger):
                 self.allexperiments = historical_runs[0]
                 self.allresults = historical_runs[1]
             else:
-                raise ValueError("historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result")
-        logging.debug("allresults is: "+str(self.allresults))
+                raise ValueError(
+                    "historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result"
+                )
+        logging.debug("allresults is: " + str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         if historical_runs is None or not (self.allexperiments and self.allresults):
@@ -107,7 +110,9 @@ class StackedShortcut(Debugger):
                 for param in self.my_inputs:
                     value = d[param]
                     exp.append(value)
-                if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+                if [p for p in exp] not in expers and (
+                    len(self.allexperiments) + len(requests)
+                ) < self.max_iter:
                     self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
@@ -134,7 +139,7 @@ class StackedShortcut(Debugger):
                         time.sleep(1)
                         self.is_poller_not_sync = False
 
-        logging.debug('allexperiments: '+str(self.allexperiments))
+        logging.debug("allexperiments: " + str(self.allexperiments))
         initial_experiments_num = len(self.allexperiments)
         self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
@@ -152,7 +157,6 @@ class StackedShortcut(Debugger):
                     cf_aux[p] = cg[p]
                     result = False
                     if cf_aux not in self.expers:
-
                         self._workflow(cf_aux)
 
                         if self.is_poller_not_sync:
@@ -211,17 +215,25 @@ class StackedShortcut(Debugger):
         self.sender.close()
         self.context.term()
         if self.created_instances:
-            return (len(self.allexperiments) - initial_experiments_num)
-        return self.believeddecisive, len(self.allexperiments), (len(self.allexperiments) - initial_experiments_num)
+            return len(self.allexperiments) - initial_experiments_num
+        return (
+            self.believeddecisive,
+            len(self.allexperiments),
+            (len(self.allexperiments) - initial_experiments_num),
+        )
 
-
-    def __init__(self, created_instances=False, k=4, max_iter=1000, origin=None, separator="|",
-                 send="5557", receive="5558"):
-        super(StackedShortcut, self).__init__(max_iter=max_iter,
-                                       origin=origin,
-                                       separator=separator,
-                                       send=send,
-                                       receive=receive
-                                       )
+    def __init__(
+        self,
+        created_instances=False,
+        k=4,
+        max_iter=1000,
+        origin=None,
+        separator="|",
+        send="5557",
+        receive="5558",
+    ):
+        super(StackedShortcut, self).__init__(
+            max_iter=max_iter, origin=origin, separator=separator, send=send, receive=receive
+        )
         self.created_instances = created_instances
         self.k = k

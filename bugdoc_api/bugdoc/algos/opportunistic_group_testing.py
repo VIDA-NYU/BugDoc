@@ -34,25 +34,20 @@
 import ast
 import copy
 import logging
-import pandas as pd
 import os
-import random
 import time
-import zmq
-from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+import pandas as pd
+import zmq
+
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
 
 class AutoDebug(object):
+    def generate_data_interventions(self, bad_dataframe, good_dataframes):
 
-
-
-    def generate_data_interventions(self,bad_dataframe,good_dataframes):
-
-        def compute_score(row,b,g):
-            return min(row['score'],abs(row[b]-row[g]))
-
+        def compute_score(row, b, g):
+            return min(row["score"], abs(row[b] - row[g]))
 
         columns = good_dataframes[0].columns
         max_diff_columns = {}
@@ -60,30 +55,34 @@ class AutoDebug(object):
 
         for c in columns:
             df = pd.DataFrame()
-            df['bad'] = bad_dataframe[c]
+            df["bad"] = bad_dataframe[c]
             first = True
             for g in range(len(good_dataframes)):
                 good = good_dataframes[g]
-                df['good_' + str(g)] = good[c]
+                df["good_" + str(g)] = good[c]
                 if first:
                     col_diff = bad_dataframe[c].sub(good[c], axis=0).abs()
-                    df['score'] = col_diff
+                    df["score"] = col_diff
                     first = False
                 else:
-                    df['score'] = df.apply(lambda row: compute_score(row, 'bad', 'good_' + str(g)), axis=1)
-            max_diff_columns[c] = max(df['score'])
-            df.sort_values(by=['score'], inplace=True, ascending=False)
+                    df["score"] = df.apply(
+                        lambda row: compute_score(row, "bad", "good_" + str(g)), axis=1
+                    )
+            max_diff_columns[c] = max(df["score"])
+            df.sort_values(by=["score"], inplace=True, ascending=False)
             column_dataframes[c] = df
 
-        column_order = [pair[0] for pair in sorted(max_diff_columns.items(), key=lambda item: item[1], reverse=True)]
+        column_order = [
+            pair[0]
+            for pair in sorted(max_diff_columns.items(), key=lambda item: item[1], reverse=True)
+        ]
 
         return column_dataframes, column_order
 
-
     def execute_intervention(self, dataframe, input_dict):
         result = False
-        temp_dataset_file = os.path.join(os.path.dirname(input_dict['dataset']),"temp.csv")
-        input_dict['dataset'] = temp_dataset_file
+        temp_dataset_file = os.path.join(os.path.dirname(input_dict["dataset"]), "temp.csv")
+        input_dict["dataset"] = temp_dataset_file
         dataframe.to_csv(temp_dataset_file, index=False)
 
         requests = set()
@@ -119,41 +118,46 @@ class AutoDebug(object):
 
         return result
 
-    def replace_column(self,column, column_dataframes, bad_dataframe, input_dict):
+    def replace_column(self, column, column_dataframes, bad_dataframe, input_dict):
         bad_col = bad_dataframe[column]
-        bad_dataframe[column] = column_dataframes[column]['good_0']
-        # Test
-        result = self.execute_intervention(bad_dataframe, input_dict)
-        #roll back
-        bad_dataframe[column] = bad_col
-        return result
-
-    def replace_keys(self, column, column_dataframes, bad_dataframe, keys, input_dict):
-        bad_col = bad_dataframe[column]
-        bad_dataframe[column][keys] = column_dataframes[column]['good_0'][keys]
+        bad_dataframe[column] = column_dataframes[column]["good_0"]
         # Test
         result = self.execute_intervention(bad_dataframe, input_dict)
         # roll back
         bad_dataframe[column] = bad_col
         return result
 
+    def replace_keys(self, column, column_dataframes, bad_dataframe, keys, input_dict):
+        bad_col = bad_dataframe[column]
+        bad_dataframe[column][keys] = column_dataframes[column]["good_0"][keys]
+        # Test
+        result = self.execute_intervention(bad_dataframe, input_dict)
+        # roll back
+        bad_dataframe[column] = bad_col
+        return result
 
     def run(self, filename, input_dict, bad_dataset, good_datasets, outputs):
         bad_dataframe = pd.read_csv(bad_dataset)
-        good_dataframes = [pd.read_csv(file).select_dtypes(include='number') for file in good_datasets]
-        input_dict['dataset'] = bad_dataset
+        good_dataframes = [
+            pd.read_csv(file).select_dtypes(include="number") for file in good_datasets
+        ]
+        input_dict["dataset"] = bad_dataset
         self.my_inputs = input_dict.keys()
         self.my_outputs = outputs
         self.filename = filename
 
-        column_dataframes, column_order = self.generate_data_interventions(bad_dataframe,good_dataframes)
+        column_dataframes, column_order = self.generate_data_interventions(
+            bad_dataframe, good_dataframes
+        )
         for column in column_order:
             flipped = self.replace_column(column, column_dataframes, bad_dataframe, input_dict)
             if flipped:
                 keys = list(column_dataframes[column].index)
                 while len(keys) > 1:
-                    sub_keys = keys[:len(keys)//2]
-                    flipped = self.replace_keys(column, column_dataframes, bad_dataframe, sub_keys, input_dict)
+                    sub_keys = keys[: len(keys) // 2]
+                    flipped = self.replace_keys(
+                        column, column_dataframes, bad_dataframe, sub_keys, input_dict
+                    )
                     if flipped:
                         keys = sub_keys
                     else:
@@ -161,13 +165,11 @@ class AutoDebug(object):
                 self.believeddecisive = [column, keys]
                 break
 
-
         self.poller.unregister(self.receiver)
         self.receiver.close()
         self.sender.close()
         self.context.term()
         return self.believeddecisive
-
 
     def workflow(self, parameter_list):
         message = self.filename
