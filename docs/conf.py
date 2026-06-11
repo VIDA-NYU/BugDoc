@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../bugdoc_api'))
-sys.path.insert(0, os.path.abspath('../examples'))
+sys.path.insert(1, os.path.abspath('../examples'))
 
 
 # -- Project information -----------------------------------------------------
