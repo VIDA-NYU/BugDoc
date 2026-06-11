@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../bugdoc_api'))
-sys.path.insert(1, os.path.abspath('../examples'))
+sys.path.insert(0, os.path.abspath('../examples'))
 
 
 # -- Project information -----------------------------------------------------
@@ -68,11 +68,9 @@ autoclass_content = 'both'
 
 add_module_names = False
 
-exclude_patterns = [r'my_api_example\.py', r'__init__\.py']
-
 sphinx_gallery_conf = {
      'examples_dirs': '../examples',   # path to your example scripts
      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+     'ignore_pattern': r"(^|/)(__init__\.py|my_api_example\.py)$",
 }
-
 
