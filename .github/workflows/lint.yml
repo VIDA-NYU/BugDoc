@@ -42,14 +42,6 @@ jobs:
         isort --check-only bugdoc_api/bugdoc bugdoc_cli test --profile black --diff
       continue-on-error: true
 
-    - name: Lint with flake8
-      run: |
-        flake8 bugdoc_api/bugdoc bugdoc_cli test \
-          --max-line-length=100 \
-          --extend-ignore=E203,W503 \
-          --count \
-          --statistics
-      continue-on-error: true
 
     - name: Lint with ruff
       run: |
