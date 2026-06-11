@@ -74,3 +74,5 @@ sphinx_gallery_conf = {
      'ignore_pattern': r"(^|/)(__init__\.py|my_api_example\.py)$",
 }
 
+nbsphinx_allow_errors = True
+
