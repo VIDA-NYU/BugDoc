@@ -45,4 +45,28 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
     ],
+    extras_require={
+        "docs": [
+            "sphinx>=6.0",
+            "sphinx_rtd_theme>=1.0",
+            "sphinx-gallery>=0.13",
+            "nbsphinx>=0.9",
+            "nbsphinx-link>=1.3",
+            "ipykernel>=6.0"
+            ],
+        "dev": [
+            "black[jupyter]>=23.0",
+            "flake8>=6.0",
+            "ruff>=0.1",
+            "mypy>=1.0",
+            "isort>=5.12",
+            "pytest>=7.0",
+            "pytest-cov>=4.0",
+            "pytest-xdist>=3.0",
+            "pytest-timeout>=2.1",
+            "coverage[toml]>=7.0",
+            "bandit[toml]>=1.7",
+            "pre-commit>=3.0"
+            ]
+    }
 )
