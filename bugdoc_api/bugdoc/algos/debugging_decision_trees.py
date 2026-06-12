@@ -31,27 +31,25 @@
 ## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
 ##
 ###############################################################################
-import ast
-import bugdoc.utils.tree as tree
 import copy
-import queue
 import logging
+import queue
 import time
-import zmq
-from builtins import zip
-from builtins import str
-from builtins import range
-from bugdoc.algos.base import Debugger
-from bugdoc.utils.utils import load_runs, compute_score, load_combinatorial, load_permutations
+from builtins import range, str, zip
+
 from future import standard_library
 from six import string_types
 
+import bugdoc.utils.tree as tree
+from bugdoc.algos.base import Debugger
+from bugdoc.utils.utils import compute_score, load_combinatorial, load_permutations, load_runs
+
 standard_library.install_aliases()
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
 
 class DebuggingDecisionTrees(Debugger):
-    """ Creates pipeline instances to be run based on a decision tree fitted on execution history and finds root causes of failure.
+    """Creates pipeline instances to be run based on a decision tree fitted on execution history and finds root causes of failure.
 
     This algorithm fits a decision tree using parameters as features and results of pipelines as target.
     The results are boolean evaluations of success (True) or fail (False). It takes an entry point of
@@ -65,9 +63,9 @@ class DebuggingDecisionTrees(Debugger):
             path.append((node.col, node.value, True))
             self.determinenodepurity(node.fb, pathfalse)
             self.determinenodepurity(node.tb, path)
-        elif (len(node.results.items()) > 1):
+        elif len(node.results.items()) > 1:
             self.mixedlist.append(path)
-        elif (node.results.items()[0][0]):
+        elif node.results.items()[0][0]:
             self.puregoodlist.append(path)
         else:
             self.purebadlist.append(path)
@@ -79,15 +77,16 @@ class DebuggingDecisionTrees(Debugger):
         purebadpath = None
         while (not q.empty()) and ((puregoodpath is None) or (purebadpath is None)):
             current = q.get()
-            if current[0].results is None:
-                q.put((current[0].fb, current[1] + [(current[0].col, current[0].value, False)]))
-                q.put((current[0].tb, current[1] + [(current[0].col, current[0].value, True)]))
-            elif (len(list(current[0].results.items())) > 1):
-                continue
-            elif (list(current[0].results.items())[0][0]) and (puregoodpath is None):
-                puregoodpath = current[1]
-            elif (not list(current[0].results.items())[0][0]) and (purebadpath is None):
-                purebadpath = current[1]
+            if current[0]:
+                if current[0].results is None:
+                    q.put((current[0].fb, current[1] + [(current[0].col, current[0].value, False)]))
+                    q.put((current[0].tb, current[1] + [(current[0].col, current[0].value, True)]))
+                elif len(list(current[0].results.items())) > 1:
+                    continue
+                elif (list(current[0].results.items())[0][0]) and (puregoodpath is None):
+                    puregoodpath = current[1]
+                elif (not list(current[0].results.items())[0][0]) and (purebadpath is None):
+                    purebadpath = current[1]
         return [puregoodpath, purebadpath]
 
     def findallpaths(self, node):
@@ -96,41 +95,42 @@ class DebuggingDecisionTrees(Debugger):
         puregoodpaths = []
         purebadpaths = []
 
-        while (not q.empty()):
+        while not q.empty():
             current = q.get()
-            if current[0].results is None:
-                key = current[0].col
-                value = current[0].value
-                q.put((current[0].fb, current[1] + [(key, value, False)]))
-                q.put((current[0].tb, current[1] + [(key, value, True)]))
-            elif (len(list(current[0].results.items())) > 1):
-                continue
-            elif (list(current[0].results.items())[0][0]):
-                puregoodpaths.append(current[1])
-            elif (not list(current[0].results.items())[0][0]):
-                purebadpaths.append(current[1])
+            if current[0]:
+                if current[0].results is None:
+                    key = current[0].col
+                    value = current[0].value
+                    q.put((current[0].fb, current[1] + [(key, value, False)]))
+                    q.put((current[0].tb, current[1] + [(key, value, True)]))
+                elif len(list(current[0].results.items())) > 1:
+                    continue
+                elif list(current[0].results.items())[0][0]:
+                    puregoodpaths.append(current[1])
+                elif not list(current[0].results.items())[0][0]:
+                    purebadpaths.append(current[1])
         return [puregoodpaths, purebadpaths]
 
     def manufacturetests(self, moralflag, alist):
         rebuild = False
         logging.debug("a list: " + str(alist))
-        if (moralflag == 'bad'):
+        if moralflag == "bad":
             for path in alist:
                 logging.debug("at step 2.5, path: " + str(path))
-                z = self.assembletests('bad', path)
+                z = self.assembletests("bad", path)
                 if z:
                     logging.debug("believeddecisive for bad: " + str(path))
-                    self.believeddecisive.append(('bad', path))
+                    self.believeddecisive.append(("bad", path))
                 else:
                     rebuild = True
 
-        if (moralflag == 'good'):
+        if moralflag == "good":
             for path in alist:
                 logging.debug("at step 3.5, path: " + str(path))
-                z = self.assembletests('good', path)
+                z = self.assembletests("good", path)
                 if z:
                     logging.debug("believeddecisive for good: " + str(path))
-                    self.believeddecisive.append(('good', path))
+                    self.believeddecisive.append(("good", path))
                 else:
                     rebuild = True
         return rebuild
@@ -173,7 +173,7 @@ class DebuggingDecisionTrees(Debugger):
                 for param in self.my_inputs:
                     value = d[param]
                     x.append(value)
-                if (x not in self.expers):
+                if x not in self.expers:
                     experiments.append(x)
                     costs.append(compute_score(x, self.my_inputs, self.pv_goodness, moralflag))
                 else:
@@ -182,7 +182,8 @@ class DebuggingDecisionTrees(Debugger):
         # Executing experiments in ascending order of costs
         allrets = []
         indices = [t[0] for t in sorted(enumerate(costs), key=lambda x: x[1])]
-        if len(indices) > self.k: indices = indices[:self.k]
+        if len(indices) > self.k:
+            indices = indices[: self.k]
         requests = set()
         for i in indices:
             if (len(self.allexperiments) + len(requests)) < self.max_iter:
@@ -194,11 +195,10 @@ class DebuggingDecisionTrees(Debugger):
                 requests.add(str(e))
 
         while len(requests) > 0:
-            socks = dict(self.poller.poll(1000))
+            socks = self.poll_results(10000)
             if socks:
-                if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv_string(zmq.NOBLOCK)
-                    exp = ast.literal_eval(msg)
+                exp = self.get_result_from_poll(socks)
+                if exp:
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
                     for i in range(len(self.my_inputs)):
@@ -207,11 +207,11 @@ class DebuggingDecisionTrees(Debugger):
                         if key not in self.pv_goodness:
                             self.pv_goodness[key] = {}
                         if v not in self.pv_goodness[key]:
-                            self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
+                            self.pv_goodness[key][v] = {"good": 0, "bad": 0}
                         if result_value:
-                            self.pv_goodness[key][v]['good'] += 1
+                            self.pv_goodness[key][v]["good"] += 1
                         else:
-                            self.pv_goodness[key][v]['bad'] += 1
+                            self.pv_goodness[key][v]["bad"] += 1
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
                     x[-1] = x[-1]
@@ -232,7 +232,9 @@ class DebuggingDecisionTrees(Debugger):
                         self.is_poller_not_sync = False
 
         if len(set(allrets)) == 1:
-            if ((moralflag == 'good') and (not allrets[0])) or ((moralflag == 'bad') and allrets[0]):
+            if ((moralflag == "good") and (not allrets[0])) or (
+                (moralflag == "bad") and allrets[0]
+            ):
                 return False
             return True
 
@@ -241,35 +243,66 @@ class DebuggingDecisionTrees(Debugger):
 
         return False
 
-    def run(self, entry_point, input_dict, outputs=['results'], rebuild=True):
+    def run(self, entry_point, input_dict, outputs=["results"], rebuild=True, historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, self.pv_goodness = load_runs(self.entry_point,
-                                                                           self.my_inputs)
+        if historical_runs is None:
+            self.allexperiments, self.allresults, self.pv_goodness = load_runs(
+                self.entry_point, self.my_inputs
+            )
+        else:
+            if isinstance(historical_runs, (list, tuple)):
+                if len(historical_runs) >= 3:
+                    self.allexperiments, self.allresults, self.pv_goodness = historical_runs[:3]
+                elif len(historical_runs) == 2:
+                    self.allexperiments, self.allresults = historical_runs
+                    self.pv_goodness = {}
+                    for exp in self.allresults:
+                        result_value = exp[-1]
+                        for i in range(len(self.my_inputs)):
+                            key = self.my_inputs[i]
+                            v = exp[i]
+                            if key not in self.pv_goodness:
+                                self.pv_goodness[key] = {}
+                            if v not in self.pv_goodness[key]:
+                                self.pv_goodness[key][v] = {"good": 0, "bad": 0}
+                            if result_value:
+                                self.pv_goodness[key][v]["good"] += 1
+                            else:
+                                self.pv_goodness[key][v]["bad"] += 1
+                else:
+                    raise ValueError(
+                        "historical_runs must be a list/tuple of [allexperiments, allresults] or [allexperiments, allresults, pv_goodness]"
+                    )
+            else:
+                raise ValueError(
+                    "historical_runs must be a list/tuple of [allexperiments, allresults] or [allexperiments, allresults, pv_goodness]"
+                )
+
         logging.debug("pv_goodness is: " + str(self.pv_goodness))
         logging.debug("allresults is: " + str(self.allresults))
         requests = set()
         self.expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         self.rets = [self.allresults[j][-1] for j in range(len(self.allresults))]
-        permutations = load_combinatorial(input_dict)
-        for d in permutations:
-            exp = []
-            for param in self.my_inputs:
-                value = d[param]
-                exp.append(value)
-            if ([p for p in exp] not in self.expers):
-                if (len(self.allexperiments) + len(requests)) < self.max_iter:
-                    self._workflow(exp)
-                    if self.is_poller_not_sync:
-                        time.sleep(1)
-                        self.is_poller_not_sync = False
-                    requests.add(str(exp))
+        if historical_runs is None or not (self.allexperiments and self.allresults):
+            permutations = load_combinatorial(input_dict)
+            for d in permutations:
+                exp = []
+                for param in self.my_inputs:
+                    value = d[param]
+                    exp.append(value)
+                if [p for p in exp] not in self.expers:
+                    if (len(self.allexperiments) + len(requests)) < self.max_iter:
+                        self._workflow(exp)
+                        if self.is_poller_not_sync:
+                            time.sleep(1)
+                            self.is_poller_not_sync = False
+                        requests.add(str(exp))
 
         while len(requests) > 0:
-            socks = dict(self.poller.poll(10000))
+            socks = self.poll_results(10000)
             if socks:
-                if socks.get(self.receiver) == zmq.POLLIN:
-                    msg = self.receiver.recv_string(zmq.NOBLOCK)
-                    exp = ast.literal_eval(msg)
+                exp = self.get_result_from_poll(socks)
+                if exp:
                     self.allexperiments.append(exp)
                     result_value = exp[-1]
                     for i in range(len(self.my_inputs)):
@@ -278,11 +311,11 @@ class DebuggingDecisionTrees(Debugger):
                         if key not in self.pv_goodness:
                             self.pv_goodness[key] = {}
                         if v not in self.pv_goodness[key]:
-                            self.pv_goodness[key][v] = {'good': 0, 'bad': 0}
+                            self.pv_goodness[key][v] = {"good": 0, "bad": 0}
                         if result_value:
-                            self.pv_goodness[key][v]['good'] += 1
+                            self.pv_goodness[key][v]["good"] += 1
                         else:
-                            self.pv_goodness[key][v]['bad'] += 1
+                            self.pv_goodness[key][v]["bad"] += 1
 
                     requests.discard(str(exp[:-1]))
                     x = copy.deepcopy(exp)
@@ -306,7 +339,9 @@ class DebuggingDecisionTrees(Debugger):
         initial_experiments_num = len(self.allexperiments)
         while rebuild:
             self.cohort += 1
-            rebuild = len(self.allexperiments) < self.max_iter and len(self.allexperiments) > iteration
+            rebuild = (
+                len(self.allexperiments) < self.max_iter and len(self.allexperiments) > iteration
+            )
             iteration = len(self.allexperiments)
             logging.debug("rebuild")
             logging.debug("allresults is: " + str(self.allresults))
@@ -316,10 +351,10 @@ class DebuggingDecisionTrees(Debugger):
             if self.first_solution:
                 _, badpath = self.findshoertestpaths(t)
                 if badpath:
-                    rebuild = rebuild and self.manufacturetests('bad', [badpath])
+                    rebuild = rebuild and self.manufacturetests("bad", [badpath])
             else:
                 _, badpaths = self.findallpaths(t)
-                rebuild = rebuild and self.manufacturetests('bad', badpaths)
+                rebuild = rebuild and self.manufacturetests("bad", badpaths)
 
         self.puregoodlist = []
         self.purebadlist = []
@@ -328,19 +363,25 @@ class DebuggingDecisionTrees(Debugger):
         # tree.draw_tree(t)
         logging.debug("length of all experiments is: " + str(len(self.allexperiments)))
         # logging.debug("The current goodness count is: " + str(self.pv_goodness))
-        self.poller.unregister(self.receiver)
-        self.receiver.close()
-        self.sender.close()
-        self.context.term()
+        self.close()
         if self.created_instances:
-            return (len(self.allexperiments) - initial_experiments_num)
+            return len(self.allexperiments) - initial_experiments_num
         return self.believeddecisive, t, len(self.allexperiments)
 
-
-
-    def __init__(self, return_num_instances=False, first_solution=False, num_tests=10000, use_score=False,
-                 max_iter=10000, origin=None, separator="|", send="5557", receive="5558"):
-        """ Build a new debugging debugging decision trees algorithm object.
+    def __init__(
+        self,
+        return_num_instances=False,
+        first_solution=False,
+        num_tests=10000,
+        use_score=False,
+        max_iter=10000,
+        origin=None,
+        separator="|",
+        send="5557",
+        receive="5558",
+        function=None,
+    ):
+        """Build a new debugging debugging decision trees algorithm object.
 
         Parameters
         ----------
@@ -353,17 +394,33 @@ class DebuggingDecisionTrees(Debugger):
             parameter-value, is defined by the ratio of successful and failing instances in which a given
             parameter-values appears.
         """
-        super(DebuggingDecisionTrees, self).__init__(max_iter=max_iter,
-                                                     origin=origin,
-                                                     separator=separator,
-                                                     send=send,
-                                                     receive=receive
-                                                     )
+        super(DebuggingDecisionTrees, self).__init__(
+            max_iter=max_iter,
+            origin=origin,
+            separator=separator,
+            send=send,
+            receive=receive,
+            function=function,
+        )
+        print(
+            "Initialized DebuggingDecisionTrees with max_iter={}, origin={}, separator={}, send={}, receive={}, function={}, return_num_instances={}, first_solution={}, num_tests={}, use_score={}".format(
+                max_iter,
+                origin,
+                separator,
+                send,
+                receive,
+                function,
+                return_num_instances,
+                first_solution,
+                num_tests,
+                use_score,
+            )
+        )
         self.created_instances = return_num_instances
         self.puregoodlist = []
         self.purebadlist = []
         self.mixedlist = []
-        self.cost = '1'
+        self.cost = "1"
         self.cols = []
         self.pv_goodness = {}
         self.first_solution = first_solution

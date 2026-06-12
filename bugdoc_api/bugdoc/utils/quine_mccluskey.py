@@ -32,7 +32,7 @@
 ##
 ###############################################################################
 
-'''
+"""
 Originally Written By JongHewk Park in June 2, 2015
 Modified by Raoni Lourenco in January, 2018
 
@@ -42,15 +42,14 @@ Here is the algorithm
 3. Find essential prime implicants
 4. Use GA for set cover problem
 
-'''
+"""
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
-from builtins import map
-from builtins import range
 import itertools
 import queue
+from builtins import map, range
+
 import numpy as np
 
 
@@ -81,7 +80,7 @@ def comp_binary_same(term, number):
     :return:
     """
     for i in range(len(term)):
-        if term[i] != '-':
+        if term[i] != "-":
             if term[i] != number[i]:
                 return False
 
@@ -115,7 +114,7 @@ def combine_pairs(group, unchecked):
                     unchecked -= {elem2}
                     # replace the different bit with '-'
                     new_elem = list(elem1)
-                    new_elem[pos] = '-'
+                    new_elem[pos] = "-"
                     new_elem = "".join(new_elem)
                     next_group[keys[i]].add(new_elem)
                     unchecked.add(new_elem)
@@ -191,12 +190,12 @@ def check_all_zero(chart):
 
 
 # find max value in list
-def find_max(l):
+def find_max(list1):
     """
-    :param l:
+    :param list1:
     :return:
     """
-    return np.argmax(l)
+    return np.argmax(list1)
 
 
 # multiply two terms (ex. (p1 + p2)(p1+p4+p5) )..it returns the product
@@ -248,8 +247,8 @@ def petrick_method(chart):
                 p.append([row])
         petrick.append(p)
     # do multiplication
-    for l in range(len(petrick) - 1):
-        petrick[l + 1] = multiplication(petrick[l], petrick[l + 1])
+    for i in range(len(petrick) - 1):
+        petrick[i + 1] = multiplication(petrick[i], petrick[i + 1])
 
     petrick = sorted(petrick[len(petrick) - 1], key=len)
     final = []
@@ -271,8 +270,8 @@ def ga(chart):
     """
     alpha = {}
     beta = {}
-    S = set()
-    U = set(range(len(chart)))
+    s = set()
+    u = set(range(len(chart)))
     w = {}
     # initialization
     for col in range(len(chart[0])):
@@ -285,15 +284,15 @@ def ga(chart):
             if chart[row][col] == 1:
                 beta[col].add(row)
                 alpha[row].add(col)
-                S.add(col)
+                s.add(col)
                 w[row] += 1
-                U -= {row}
-    for row in list(U):
+                u -= {row}
+    for row in list(u):
         first = True
         minimization = None
         min_j = None
         for j in list(alpha[row]):
-            ratio = (1.0) / len(U & beta[j])
+            ratio = (1.0) / len(u & beta[j])
             if first:
                 minimization = ratio
                 min_j = j
@@ -303,18 +302,18 @@ def ga(chart):
                 break
 
         if min_j:
-            S.add(min_j)
+            s.add(min_j)
             for i in list(beta[min_j]):
                 w[i] += 1
-            U -= beta[min_j]
-    slist = list(S)
+            u -= beta[min_j]
+    slist = list(s)
     slist.sort(key=None, reverse=True)
     for j in slist:
         for i in beta[j]:
             if w[i] > 2:
-                S -= {j}
+                s -= {j}
                 w[i] -= 1
-    return list(S)
+    return list(s)
 
 
 # chart = n*n list
@@ -339,11 +338,11 @@ def find_minimum_cost(chart):
     if check_all_zero(chart) is True:
         p_final = [essential_prime]
     else:
-        P = ga(chart)
+        p = ga(chart)
         # Replacing petrick_method by GA
         # TODO reference
 
-        p_final.append(P)
+        p_final.append(p)
 
         # append prime implicants to the solution of Petrick's method
         for i in p_final:
@@ -362,7 +361,7 @@ def cal_efficient(s):
     """
     count = 0
     for i in range(len(s)):
-        if s[i] != '-':
+        if s[i] != "-":
             count += 1
 
     return count
@@ -388,13 +387,13 @@ def reduce_terms(n_var, minterms):
         if len(a[i]) < n_var:
             # add zeros to fill the n-bits
             for j in range(n_var - len(a[i])):
-                a[i] = '0' + a[i]
+                a[i] = "0" + a[i]
         # if incorrect input
         elif len(a[i]) > n_var:
             # Error : Choose the correct number of variables(bits)
             return []
         # count the num of 1
-        index = a[i].count('1')
+        index = a[i].count("1")
         # group by num of 1 separately
         if index not in group:
             group[index] = set()
@@ -433,7 +432,7 @@ def findallpaths(node):
     purebadpaths = []
     input_dict = {}
 
-    while (not q.empty()):
+    while not q.empty():
         current = q.get()
         if current[0].results is None:
             key = current[0].col
@@ -446,11 +445,11 @@ def findallpaths(node):
 
             q.put((current[0].fb, current[1] + [(key, value, False)]))
             q.put((current[0].tb, current[1] + [(key, value, True)]))
-        elif (len(current[0].results.items()) > 1):
+        elif len(current[0].results.items()) > 1:
             continue
-        elif (list(current[0].results.items())[0][0]):
+        elif list(current[0].results.items())[0][0]:
             puregoodpaths.append(current[1])
-        elif (not list(current[0].results.items())[0][0]):
+        elif not list(current[0].results.items())[0][0]:
             purebadpaths.append(current[1])
     return [puregoodpaths, purebadpaths, input_dict]
 
@@ -467,12 +466,14 @@ def from_paths_to_binary(paths, input_dict):
             for value in input_dict[param]:
                 if (param, value) not in flatten:
                     flatten.append((param, value))
+                    if len(flatten) > 10:
+                        return [miniterms, flatten]
                 if (param, value) in bits_dict:
                     path_possibilities.append([str(int(bits_dict[(param, value)]))])
                 else:
-                    path_possibilities.append(['0', '1'])
+                    path_possibilities.append(["0", "1"])
         miniterms += list(itertools.product(*path_possibilities))
-    return [[int(''.join(term), 2) for term in miniterms], flatten]
+    return [[int("".join(term), 2) for term in miniterms], flatten]
 
 
 def prune_tree(t, keys):
@@ -493,11 +494,11 @@ def prune_tree(t, keys):
         for prime in s:
             result = []
             for i in range(len(prime)):
-                if prime[i] == '1':
-                    comparator = ' == ' if isinstance(flatten[i][1], str) else ' >= '
+                if prime[i] == "1":
+                    comparator = " == " if isinstance(flatten[i][1], str) else " >= "
                     result.append(keys[flatten[i][0]] + comparator + str(flatten[i][1]))
-                elif prime[i] == '0':
-                    comparator = ' != ' if isinstance(flatten[i][1], str) else ' < '
+                elif prime[i] == "0":
+                    comparator = " != " if isinstance(flatten[i][1], str) else " < "
                     result.append(keys[flatten[i][0]] + comparator + str(flatten[i][1]))
             results.append(result)
     else:

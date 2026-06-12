@@ -32,20 +32,21 @@
 ##
 ###############################################################################
 
+import ast
 import copy
 import logging
-import zmq
-import ast
-import time
 import random
-from bugdoc.algos.base import Debugger
-from bugdoc.utils.utils import load_runs, numtests, load_combinatorial
+import time
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+import zmq
+
+from bugdoc.algos.base import Debugger
+from bugdoc.utils.utils import load_combinatorial, load_runs
+
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
 
 class Shortcut(Debugger):
-
     def determinepurity(self, myarr, mytarg):
         goodlist = []
         badlist = []
@@ -59,28 +60,38 @@ class Shortcut(Debugger):
     def get_good_and_bad_instances(self, goodlist, badlist):
         for cg in goodlist:
             for cf in badlist:
-                if (all([cg[i] != cf[i] for i in range(len(cf))])):
+                if all([cg[i] != cf[i] for i in range(len(cf))]):
                     return [cg, cf]
         return [random.choice(goodlist), random.choice(badlist)]
 
-    def run(self, entry_point, input_dict, outputs=['results']):
+    def run(self, entry_point, input_dict, outputs=["results"], historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
-        self.allexperiments, self.allresults, _ = load_runs(self.entry_point , self.my_inputs)
+        if historical_runs is None:
+            self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
+        else:
+            if isinstance(historical_runs, (list, tuple)) and len(historical_runs) >= 2:
+                self.allexperiments = historical_runs[0]
+                self.allresults = historical_runs[1]
+            else:
+                raise ValueError(
+                    "historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result"
+                )
         # logging.debug("allresults is: "+str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
-        permutations = load_combinatorial(input_dict)
-        for d in permutations:
-            exp = []
-            for param in self.my_inputs:
-                value = d[param]
-                exp.append(value)
-            if exp not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
-                self._workflow(exp)
-                if self.is_poller_not_sync:
-                    time.sleep(1)
-                    self.is_poller_not_sync = False
-                requests.add(str(exp))
+        if historical_runs is None or not (self.allexperiments and self.allresults):
+            permutations = load_combinatorial(input_dict)
+            for d in permutations:
+                exp = []
+                for param in self.my_inputs:
+                    value = d[param]
+                    exp.append(value)
+                if exp not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+                    self._workflow(exp)
+                    if self.is_poller_not_sync:
+                        time.sleep(1)
+                        self.is_poller_not_sync = False
+                    requests.add(str(exp))
 
         while len(requests) > 0:
             socks = dict(self.poller.poll(10000))
@@ -122,7 +133,6 @@ class Shortcut(Debugger):
                 cf_aux[p] = cg[p]
                 result = False
                 if cf_aux not in self.expers:
-
                     self._workflow(cf_aux)
 
                     if self.is_poller_not_sync:
@@ -185,12 +195,7 @@ class Shortcut(Debugger):
 
         return self.believeddecisive, len(self.allexperiments)
 
-
     def __init__(self, max_iter=1000, origin=None, separator="|", send="5557", receive="5558"):
-        super(Shortcut, self).__init__(max_iter=max_iter,
-                                       origin=origin,
-                                       separator=separator,
-                                       send=send,
-                                       receive=receive
-                                       )
-
+        super(Shortcut, self).__init__(
+            max_iter=max_iter, origin=origin, separator=separator, send=send, receive=receive
+        )
