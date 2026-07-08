@@ -30,7 +30,7 @@ jobs:
 
     - name: Install linting tools
       run: |
-        pip install black flake8 ruff isort mypy bandit[toml] pylint
+        pip install black flake8 ruff isort mypy bandit[toml]
 
     - name: Check code formatting with black
       run: |
