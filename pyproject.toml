@@ -1,0 +1,175 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bugdoc"
+version = "0.2.0"
+description = "A framework for finding root causes of errors in computational pipelines"
+readme = "README.md"
+requires-python = ">=3.8.1"
+authors = [{name = "Raoni Lourenço", email = "raoni@nyu.edu"}]
+maintainers = [{name = "Raoni Lourenço", email = "raoni@nyu.edu"}]
+keywords = ["Scientific Workflows", "Provenance", "Debugging", "Heuristic Algorithms"]
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+]
+
+dependencies = [
+    "future",
+    "numpy",
+    "pyzmq",
+    "certifi>=2023.0",
+    "Pillow>=9.0",
+    "Django>=4.2.17",
+    "ruff>=0.15.16",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black[jupyter]>=23.0",
+    "flake8>=6.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "isort>=5.12",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.0",
+    "pytest-timeout>=2.1",
+    "coverage[toml]>=7.0",
+    "bandit[toml]>=1.7",
+    "pre-commit>=3.0",
+]
+
+docs = [
+    "sphinx>=6.0",
+    "sphinx_rtd_theme>=1.0",
+    "sphinx-gallery>=0.13",
+    "nbsphinx>=0.9",
+    "nbsphinx-link>=1.3",
+    "ipykernel>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/VIDA-NYU/BugDoc"
+Documentation = "https://bugdoc.readthedocs.io"
+Repository = "https://github.com/VIDA-NYU/BugDoc"
+Issues = "https://github.com/VIDA-NYU/BugDoc/issues"
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.git
+  | \.venv
+  | build
+  | dist
+  | bugdoc\.egg-info
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_mode = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = ["*/migrations/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = ["E", "F", "W", "I", "N"]
+ignore = [
+    "E501",  # Line too long (handled by black)r
+]
+exclude = [
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["bugdoc", "bugdoc_cli"]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "pass$",
+]
+exclude_also = [
+    "def __repr__",
+    "if self\\.debug:",
+    "if settings\\.DEBUG",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["test"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --tb=short --maxfail=3 -x"
+markers = [
+    "incremental: marks test as incremental (deselect with '-m \"not incremental\"')",
+    "integration: marks test as integration test",
+    "slow: marks test as slow",
+    "unit: marks test as unit test",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.setuptools]
+packages = ["bugdoc", "bugdoc_cli"]
+
+[tool.setuptools.package-dir]
+"" = "bugdoc_api"
+bugdoc_cli = "bugdoc_cli"
+
+[tool.setuptools.package-data]
+bugdoc = ["py.typed"]

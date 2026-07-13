@@ -34,19 +34,17 @@
 
 import copy
 import logging
-import ast
 import time
 
-import zmq
 from bugdoc.algos.base import Debugger
-from bugdoc.utils.utils import load_runs, load_combinatorial
+from bugdoc.utils.utils import load_combinatorial, load_runs
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
 
 class StackedShortcutStandalone(Debugger):
-    """ Standalone-compatible version of StackedShortcut algorithm.
-    
+    """Standalone-compatible version of StackedShortcut algorithm.
+
     This version works in both standalone mode (with direct function execution)
     and ZMQ mode (with external worker process). It can be used as a drop-in
     replacement for StackedShortcut when standalone mode is desired.
@@ -94,7 +92,7 @@ class StackedShortcutStandalone(Debugger):
             return [cgs, cf]
         return []
 
-    def run(self, entry_point, input_dict, outputs=['results'], historical_runs=None):
+    def run(self, entry_point, input_dict, outputs=["results"], historical_runs=None):
         super().run(entry_point, input_dict, outputs=outputs)
         if historical_runs is None:
             self.allexperiments, self.allresults, _ = load_runs(self.entry_point, self.my_inputs)
@@ -103,8 +101,10 @@ class StackedShortcutStandalone(Debugger):
                 self.allexperiments = historical_runs[0]
                 self.allresults = historical_runs[1]
             else:
-                raise ValueError("historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result")
-        logging.debug("allresults is: "+str(self.allresults))
+                raise ValueError(
+                    "historical_runs must be a list/tuple of [allexperiments, allresults] or a load_runs result"
+                )
+        logging.debug("allresults is: " + str(self.allresults))
         requests = set()
         expers = [self.allresults[j][:-1] for j in range(len(self.allresults))]
         if historical_runs is None or not (self.allexperiments and self.allresults):
@@ -114,7 +114,9 @@ class StackedShortcutStandalone(Debugger):
                 for param in self.my_inputs:
                     value = d[param]
                     exp.append(value)
-                if [p for p in exp] not in expers and (len(self.allexperiments) + len(requests)) < self.max_iter:
+                if [p for p in exp] not in expers and (
+                    len(self.allexperiments) + len(requests)
+                ) < self.max_iter:
                     self._workflow(exp)
                     if self.is_poller_not_sync:
                         time.sleep(1)
@@ -141,8 +143,7 @@ class StackedShortcutStandalone(Debugger):
                         time.sleep(1)
                         self.is_poller_not_sync = False
 
-        logging.debug('allexperiments: '+str(self.allexperiments))
-        initial_experiments_num = len(self.allexperiments)
+        logging.debug("allexperiments: " + str(self.allexperiments))
 
         # Proceed with debugging logic...
         # (This is simplified; full implementation would continue with the algorithm logic)
@@ -162,7 +163,6 @@ class StackedShortcutStandalone(Debugger):
                     cf_aux[p] = cg[p]
                     result = False
                     if cf_aux not in self.expers:
-
                         self._workflow(cf_aux)
                         requests.add(str(cf_aux))
 
@@ -205,15 +205,14 @@ class StackedShortcutStandalone(Debugger):
                         break
                 if len(believeddecisive) > 0 and believeddecisive not in self.believeddecisive:
                     self.believeddecisive.append(believeddecisive)
-                 
+
         return self.believeddecisive
-    
-    def __init__(self, created_instances=False, k=4, max_iter=1000, origin=None, separator="|", function=None):
-        super(StackedShortcutStandalone, self).__init__(max_iter=max_iter,
-                                       origin=origin,
-                                       separator=separator,
-                                        function=function
-                                       )
+
+    def __init__(
+        self, created_instances=False, k=4, max_iter=1000, origin=None, separator="|", function=None
+    ):
+        super(StackedShortcutStandalone, self).__init__(
+            max_iter=max_iter, origin=origin, separator=separator, function=function
+        )
         self.created_instances = created_instances
         self.k = k
-

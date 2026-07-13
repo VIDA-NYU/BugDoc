@@ -32,27 +32,23 @@
 ##
 ###############################################################################
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
 import copy
 import json
 import logging
+import math
 import os
 import sys
 import traceback
+from builtins import range, str
 
-from builtins import str
-from builtins import range
 from bugdoc.utils.combinatorial_design import generate_tuples
-import copy
-import math
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
 goodbad = [True, False]
 numtests = 30
-
 
 
 def compute_score(experiment, input_parameters, pv_goodness, moralflag):
@@ -60,7 +56,9 @@ def compute_score(experiment, input_parameters, pv_goodness, moralflag):
     for i in range(len(input_parameters)):
         key = input_parameters[i]
         v = experiment[i]
-        score += float(pv_goodness[key][v][moralflag]) / float(pv_goodness[key][v]['good'] + pv_goodness[key][v]['bad'])
+        score += float(pv_goodness[key][v][moralflag]) / float(
+            pv_goodness[key][v]["good"] + pv_goodness[key][v]["bad"]
+        )
     return score
 
 
@@ -78,12 +76,12 @@ def load_runs(filename, input_keys, lims=None):
 
     if lims is None:
         lims = [0, len(alllines)]
-    for e in alllines[lims[0]:lims[1]]:
+    for e in alllines[lims[0] : lims[1]]:
         try:
             exp = []
             exp_dict = json.loads(e[:-1])
-            
-            result_value = exp_dict['result']
+
+            result_value = exp_dict["result"]
 
             for key in input_keys:
                 if key not in pv_goodness:
@@ -93,15 +91,15 @@ def load_runs(filename, input_keys, lims=None):
                 exp.append(v)
 
                 if v not in pv_goodness[key]:
-                    pv_goodness[key][v] = {'good': 0, 'bad': 0}
+                    pv_goodness[key][v] = {"good": 0, "bad": 0}
 
                 if eval(result_value):
-                    pv_goodness[key][v]['good'] += 1
+                    pv_goodness[key][v]["good"] += 1
                 else:
-                    pv_goodness[key][v]['bad'] += 1
+                    pv_goodness[key][v]["bad"] += 1
             exp.append(result_value)
             allexperiments.append(exp)
-        except:
+        except Exception:
             traceback.print_exc(file=sys.stdout)
 
     for e in allexperiments:
@@ -121,34 +119,44 @@ def load_dataxray(filename, input_keys, lims=None):
 
     feature_vector = ""
     for _ in input_keys:
-        feature_vector += 'a:'
-    feature_vector += "\t" + feature_vector.replace('a',
-                                                    '1') + ';rate;cost;false;' + feature_vector + ';' + feature_vector.replace(
-        'a', '0') + ';' + str(len(alllines)) + ';0;'
+        feature_vector += "a:"
+    feature_vector += (
+        "\t"
+        + feature_vector.replace("a", "1")
+        + ";rate;cost;false;"
+        + feature_vector
+        + ";"
+        + feature_vector.replace("a", "0")
+        + ";"
+        + str(len(alllines))
+        + ";0;"
+    )
     count = 0
     count_error = 0
     if lims is None:
         lims = [0, len(alllines)]
-    print(('limits', str(lims)))
-    for e in alllines[lims[0]:lims[1]]:
+    print(("limits", str(lims)))
+    for e in alllines[lims[0] : lims[1]]:
         try:
             exp_dict = json.loads(e[:-1])
-            result = exp_dict['result']
-            feature_vector += str(count) + '%' + str(result) + '%'
+            result = exp_dict["result"]
+            feature_vector += str(count) + "%" + str(result) + "%"
             if not result:
                 count_error += 1
             for key in input_keys:
-                if type(exp_dict[key]) == str:
+                if isinstance(exp_dict[key], str):
                     v = exp_dict[key].encode("utf-8")
                 else:
                     v = exp_dict[key]
-                feature_vector += 'a_' + key + '#' + str(v) + ':'
+                feature_vector += "a_" + key + "#" + str(v) + ":"
             count += 1
-            feature_vector += '='
-        except:
+            feature_vector += "="
+        except Exception:
             pass
     # TODO learn how to compute cost
-    return feature_vector.replace('rate', str(0 if count == 0 else count_error / float(count))).replace('cost', '99.99')
+    return feature_vector.replace(
+        "rate", str(0 if count == 0 else count_error / float(count))
+    ).replace("cost", "99.99")
 
 
 def _sample_values(values, max_size):
@@ -182,10 +190,18 @@ def load_combinatorial(input_dict, max_pair_product=10000):
     if largest_size * second_size <= max_pair_product:
         return generate_tuples(copy.deepcopy(input_dict))
 
-    max_side = int(math.ceil(math.sqrt(max_pair_product)))
     reduced_input = copy.deepcopy(input_dict)
-    reduced_input[largest_key] = _sample_values(reduced_input[largest_key], max_side)
-    reduced_input[second_key] = _sample_values(reduced_input[second_key], max_side)
+    while largest_size * second_size > max_pair_product:
+        max_side = int(math.floor(math.sqrt(max_pair_product)))
+        if largest_size > max_side:
+            reduced_input[largest_key] = _sample_values(reduced_input[largest_key], max_side)
+        if second_size > max_side:
+            reduced_input[second_key] = _sample_values(reduced_input[second_key], max_side)
+
+        sizes = [(key, len(values)) for key, values in reduced_input.items()]
+        sizes.sort(key=lambda item: item[1], reverse=True)
+        largest_key, largest_size = sizes[0]
+        second_key, second_size = sizes[1]
 
     return generate_tuples(reduced_input)
 
@@ -212,16 +228,16 @@ def load_permutations(input_dict):
     return permutations
 
 
-def record_python_run(paramDict, vistrail_name, origin=None):
+def record_python_run(param_dict, vistrail_name, origin=None):
     if origin:
-        paramDict["origin"] = origin
-    file_name = vistrail_name.replace('.vt', '.adb')
+        param_dict["origin"] = origin
+    file_name = vistrail_name.replace(".vt", ".adb")
     f = open(file_name, "a")
-    f.write(json.dumps(paramDict) + '\n')
+    f.write(json.dumps(param_dict) + "\n")
     f.close()
 
 
-def record_pipeline_run(filename,values,parameters,result, origin=None):
+def record_pipeline_run(filename, values, parameters, result, origin=None):
     """
 
     :param filename:
@@ -231,19 +247,15 @@ def record_pipeline_run(filename,values,parameters,result, origin=None):
     :param origin:
     :return:
     """
-    paramDict = {
-        parameters[i] : values[i]
-        for i in range(len(parameters))
-    }
-    paramDict['result'] = str(result)
+    param_dict = {parameters[i]: values[i] for i in range(len(parameters))}
+    param_dict["result"] = str(result)
 
     if origin:
-        paramDict["origin"] = origin
+        param_dict["origin"] = origin
 
-    logging.debug('Filename: ' + filename)
-    logging.debug('New configuration: ' + str(paramDict))
-    
+    logging.debug("Filename: " + filename)
+    logging.debug("New configuration: " + str(param_dict))
+
     f = open(filename, "a")
-    f.write(json.dumps(paramDict) + '\n')
+    f.write(json.dumps(param_dict) + "\n")
     f.close()
-
