@@ -69,10 +69,12 @@ autoclass_content = 'both'
 add_module_names = False
 
 sphinx_gallery_conf = {
-     'examples_dirs': '../examples',   # path to your example scripts
-     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-     'ignore_pattern': r"(^|/)(__init__\.py|my_api_example\.py)$",
+    'examples_dirs': '../examples',   # path to your example scripts
+    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+    'ignore_pattern': r"(^|/)(__init__\.py|my_api_example\.py)$",
 }
 
+# Do not execute notebooks during documentation builds. Use the notebook outputs already stored in
+# the source files to avoid environment-specific import errors during automated CI builds.
+nbsphinx_execute = 'never'
 nbsphinx_allow_errors = True
-
