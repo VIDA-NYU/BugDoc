@@ -12,6 +12,10 @@ sphinx:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.6
+  version: 3.10
   install:
+    # Install project with docs extras so Read the Docs has the same dependencies
+    # used by CI (sphinx, nbsphinx, nbsphinx-link, ipykernel, etc.).
+    - pip: "-e .[docs]"
+    # Fallback: also install any requirements listed in docs/requirements_docs.txt
     - requirements: docs/requirements_docs.txt
