@@ -190,10 +190,18 @@ def load_combinatorial(input_dict, max_pair_product=10000):
     if largest_size * second_size <= max_pair_product:
         return generate_tuples(copy.deepcopy(input_dict))
 
-    max_side = int(math.ceil(math.sqrt(max_pair_product)))
     reduced_input = copy.deepcopy(input_dict)
-    reduced_input[largest_key] = _sample_values(reduced_input[largest_key], max_side)
-    reduced_input[second_key] = _sample_values(reduced_input[second_key], max_side)
+    while largest_size * second_size > max_pair_product:
+        max_side = int(math.floor(math.sqrt(max_pair_product)))
+        if largest_size > max_side:
+            reduced_input[largest_key] = _sample_values(reduced_input[largest_key], max_side)
+        if second_size > max_side:
+            reduced_input[second_key] = _sample_values(reduced_input[second_key], max_side)
+
+        sizes = [(key, len(values)) for key, values in reduced_input.items()]
+        sizes.sort(key=lambda item: item[1], reverse=True)
+        largest_key, largest_size = sizes[0]
+        second_key, second_size = sizes[1]
 
     return generate_tuples(reduced_input)
 

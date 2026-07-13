@@ -33,7 +33,6 @@
 ###############################################################################
 
 import itertools
-import random
 
 
 def create_rows(n, m, keys):
@@ -69,7 +68,7 @@ def all_disjoint_pairs(lst):
     a = lst[0]
     for i in range(1, len(lst)):
         pair = (a, lst[i])
-        for rest in all_disjoint_pairs(lst[1:i] + lst[i + 1 :]):
+        for rest in all_disjoint_pairs(lst[1:i] + lst[i + 1:]):
             yield [pair] + rest
 
 
@@ -81,39 +80,101 @@ def get_disjoint_pairs_with_max(keys, max0, max1):
 
 
 def generate_tuples(parameters):
-    if len(parameters.keys()) % 2 != 0:
-        parameters["dummy"] = []
-    keys = list(parameters.keys())
-    max0 = keys[0]
-    max1 = keys[1]
-    for key in keys[1:]:
-        if len(parameters[key]) >= len(parameters[max0]):
-            max1 = max0
-            max0 = key
-        elif len(parameters[key]) > len(parameters[max1]):
-            max1 = key
+    if not parameters:
+        return []
 
-    handled_pairs = get_disjoint_pairs_with_max(keys, max0, max1)
-    rows = create_rows(len(parameters[max0]), len(parameters[max1]), keys)
-    for pair in handled_pairs:
-        row_index = 0
-        for v0 in parameters[pair[0]]:
-            for v1 in parameters[pair[1]]:
-                rows[row_index][pair[0]] = v0
-                rows[row_index][pair[1]] = v1
-                row_index += 1
+    normalized = {}
+    for key, values in parameters.items():
+        if isinstance(values, (list, tuple, set)):
+            normalized[key] = list(values)
+        else:
+            normalized[key] = [values]
 
-    pairs = list(itertools.combinations(keys, 2))
-    for pair in pairs:
-        if pair not in handled_pairs:
-            for v0 in parameters[pair[0]]:
-                for v1 in parameters[pair[1]]:
-                    fit(v0, v1, pair, rows, keys)
-            handled_pairs.append(pair)
-    parameters.pop("dummy", None)
+    if len(normalized) % 2 != 0:
+        normalized['dummy'] = ['dummy']
+
+    keys = list(normalized.keys())
+    pair_keys = list(itertools.combinations(keys, 2))
+    covered_pairs = {pair: set() for pair in pair_keys}
+
+    def pair_lookup(left, right):
+        return tuple(sorted((left, right)))
+
+    def can_place(row, pair, value0, value1):
+        if row[pair[0]] is not None and row[pair[0]] != value0:
+            return False
+        if row[pair[1]] is not None and row[pair[1]] != value1:
+            return False
+        return True
+
+    def gain_for(row, pair, value0, value1):
+        if not can_place(row, pair, value0, value1):
+            return None
+
+        candidate = dict(row)
+        candidate[pair[0]] = value0
+        candidate[pair[1]] = value1
+        assigned = {key: candidate[key] for key in keys if candidate[key] is not None}
+
+        gain = 0
+        for left_key, right_key in itertools.combinations(assigned.keys(), 2):
+            pair_key = pair_lookup(left_key, right_key)
+            if pair_key not in covered_pairs:
+                continue
+            value_pair = (assigned[left_key], assigned[right_key])
+            if value_pair not in covered_pairs[pair_key]:
+                gain += 1
+        return gain
+
+    rows = []
+    for pair in pair_keys:
+        values0 = normalized[pair[0]]
+        values1 = normalized[pair[1]]
+        for value0 in values0:
+            for value1 in values1:
+                if (value0, value1) in covered_pairs[pair]:
+                    continue
+
+                best_index = None
+                best_gain = None
+                for index, row in enumerate(rows):
+                    row_gain = gain_for(row, pair, value0, value1)
+                    if row_gain is None:
+                        continue
+                    if best_gain is None or row_gain > best_gain or (
+                        row_gain == best_gain and (best_index is None or index < best_index)
+                    ):
+                        best_index = index
+                        best_gain = row_gain
+
+                if best_index is None:
+                    row = {key: None for key in keys}
+                    row[pair[0]] = value0
+                    row[pair[1]] = value1
+                    rows.append(row)
+                    best_index = len(rows) - 1
+                else:
+                    row = rows[best_index]
+                    row[pair[0]] = value0
+                    row[pair[1]] = value1
+
+                assigned = {key: rows[best_index][key] for key in keys if rows[best_index][key] is not None}
+                for left_key, right_key in itertools.combinations(assigned.keys(), 2):
+                    pair_key = pair_lookup(left_key, right_key)
+                    if pair_key in covered_pairs:
+                        covered_pairs[pair_key].add((assigned[left_key], assigned[right_key]))
+
+                covered_pairs[pair].add((value0, value1))
+
+    normalized.pop('dummy', None)
+    value_indices = {key: 0 for key in normalized}
     for row in rows:
-        row.pop("dummy", None)
-        for key in parameters.keys():
+        row.pop('dummy', None)
+        for key in normalized.keys():
             if row[key] is None:
-                row[key] = random.choice(list(parameters[key]))
+                values = normalized[key]
+                index = value_indices[key] % len(values)
+                row[key] = values[index]
+                value_indices[key] += 1
+
     return rows
