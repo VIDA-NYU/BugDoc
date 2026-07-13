@@ -1,5 +1,5 @@
 
-# BugDoc [![Tests](https://github.com/VIDA-NYU/BugDoc/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/VIDA-NYU/BugDoc/actions/workflows/tests.yml) [![Lint](https://github.com/VIDA-NYU/BugDoc/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/VIDA-NYU/BugDoc/actions/workflows/lint.yml) [![Docs Status](https://readthedocs.org/projects/bugdoc/badge/?version=latest&style=flat)](https://bugdoc.readthedocs.io/en/latest/)
+# BugDoc [![Tests](https://github.com/VIDA-NYU/BugDoc/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/VIDA-NYU/BugDoc/actions/workflows/tests.yml) [![Lint](https://github.com/VIDA-NYU/BugDoc/actions/workflows/lint.yml/badge.svg?branch=master)](https://github.com/VIDA-NYU/BugDoc/actions/workflows/lint.yml) [![Docs Status](https://readthedocs.org/projects/bugdoc/badge/?version=latest&style=flat)](https://bugdoc.readthedocs.io/en/latest/)
 
 
 BugDoc is a framework for finding root causes of errors in computational pipelines.
